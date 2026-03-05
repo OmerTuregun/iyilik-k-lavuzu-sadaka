@@ -1142,10 +1142,22 @@
     .header-inner {
       grid-template-columns: 1fr;
       padding: 36px 20px 28px;
-      gap: 20px;
+      gap: 16px;
     }
   
-    .header-right { display: none; }
+    /* Mobilde hadis bloğunu gizleme; başlık/slogan bloğunun hemen altında, aynı kart içinde göster */
+    .header-right {
+      margin-top: 4px;
+    }
+
+    .hero-hadith {
+      max-width: 100%;
+      border-left: none;
+      border-top: 1px solid rgba(255,255,255,.18);
+      padding-left: 0;
+      padding-top: 10px;
+      margin-top: 4px;
+    }
   
     .stat-bar-inner { padding: 0 20px; }
     .stat-divider { margin: 0 16px; }
