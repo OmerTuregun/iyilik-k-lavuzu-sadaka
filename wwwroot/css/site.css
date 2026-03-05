@@ -1178,21 +1178,19 @@
 .ramadan-deco {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 0;          /* yükseklik yok, içerik dışarı taşar */
+    height: 0;
     z-index: 200;
     pointer-events: none;
     overflow: visible;
   }
   
-  /* ── İP (string) ── */
-  /* Her item kendi ipini ::before ile çizer */
+  /* ── DIŞ ELEMENT: sadece aşağı iner (translateY) ── */
   .deco-item {
     position: absolute;
     top: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transform-origin: top center;
   }
   
   .deco-item::before {
@@ -1208,17 +1206,59 @@
     flex-shrink: 0;
   }
   
-  /* İp uzunlukları */
   .deco-item.rope-short::before  { height: 60px; }
   .deco-item.rope-medium::before { height: 100px; }
   .deco-item.rope-long::before   { height: 140px; }
   .deco-item.rope-xlong::before  { height: 180px; }
   
-  /* ── YATAY İP ŞERIDI (üstteki yatay ip) ── */
+  /* İNME — sadece translateY, rotate ASLA */
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-70px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  
+  .deco-item:nth-child(1)  { animation: dropIn .9s .00s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(2)  { animation: dropIn .9s .08s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(3)  { animation: dropIn .9s .16s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(4)  { animation: dropIn .9s .24s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(5)  { animation: dropIn .9s .32s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(6)  { animation: dropIn .9s .40s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(7)  { animation: dropIn .9s .48s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(8)  { animation: dropIn .9s .56s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(9)  { animation: dropIn .9s .64s cubic-bezier(.34,1.4,.64,1) both; }
+  .deco-item:nth-child(10) { animation: dropIn .9s .72s cubic-bezier(.34,1.4,.64,1) both; }
+  
+  /* ── İÇ ELEMENT: sadece sallanır (rotate) ── */
+  .deco-swing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: top center;
+  }
+  
+  /* SALLANMA — sadece rotate, translateY ASLA */
+  @keyframes swing1 { 0%,100% { transform: rotate(-8.0deg); } 50% { transform: rotate( 8.0deg); } }
+  @keyframes swing2 { 0%,100% { transform: rotate( 9.0deg); } 50% { transform: rotate(-9.0deg); } }
+  @keyframes swing3 { 0%,100% { transform: rotate(-7.0deg); } 50% { transform: rotate( 11.0deg); } }
+  @keyframes swing4 { 0%,100% { transform: rotate( 6deg); } 50% { transform: rotate(-11deg); } }
+  @keyframes swing5 { 0%,100% { transform: rotate(-10deg); } 50% { transform: rotate( 7deg); } }
+  
+  /* dropIn ile aynı anda başlar (delay 0), farklı süre/açı */
+  .deco-item:nth-child(1)  .deco-swing { animation: swing1 4.2s ease-in-out infinite; }
+  .deco-item:nth-child(2)  .deco-swing { animation: swing2 5.0s ease-in-out infinite; }
+  .deco-item:nth-child(3)  .deco-swing { animation: swing3 3.8s ease-in-out infinite; }
+  .deco-item:nth-child(4)  .deco-swing { animation: swing4 4.6s ease-in-out infinite; }
+  .deco-item:nth-child(5)  .deco-swing { animation: swing5 5.2s ease-in-out infinite; }
+  .deco-item:nth-child(6)  .deco-swing { animation: swing1 4.8s ease-in-out infinite; }
+  .deco-item:nth-child(7)  .deco-swing { animation: swing3 3.6s ease-in-out infinite; }
+  .deco-item:nth-child(8)  .deco-swing { animation: swing2 4.4s ease-in-out infinite; }
+  .deco-item:nth-child(9)  .deco-swing { animation: swing4 5.6s ease-in-out infinite; }
+  .deco-item:nth-child(10) .deco-swing { animation: swing5 4.0s ease-in-out infinite; }
+  
+  /* ── YATAY İP ŞERİDİ ── */
   .ramadan-rope-line {
     position: fixed;
-    top: 0;
-    left: 0; right: 0;
+    top: 0; left: 0; right: 0;
     height: 2px;
     background: linear-gradient(
       90deg,
@@ -1232,76 +1272,31 @@
     pointer-events: none;
   }
   
-  /* ── SALLANIŞ ANİMASYONLARI ── */
-  /* Farklı süre + açılar → doğal görünüm */
-  @keyframes swing1 {
-    0%,100% { transform: rotate(-4deg); }
-    50%     { transform: rotate( 4deg); }
-  }
-  @keyframes swing2 {
-    0%,100% { transform: rotate( 5deg); }
-    50%     { transform: rotate(-5deg); }
-  }
-  @keyframes swing3 {
-    0%,100% { transform: rotate(-3deg); }
-    50%     { transform: rotate( 6deg); }
-  }
-  @keyframes swing4 {
-    0%,100% { transform: rotate( 2deg); }
-    50%     { transform: rotate(-7deg); }
-  }
-  @keyframes swing5 {
-    0%,100% { transform: rotate(-6deg); }
-    50%     { transform: rotate( 3deg); }
-  }
-  
-  /* İlk açılış: yukarıdan inme */
-  @keyframes dropIn {
-    from { opacity: 0; transform: translateY(-60px) rotate(0deg); }
-    to   { opacity: 1; transform: translateY(0)     rotate(0deg); }
-  }
-  
-  .deco-item {
-    animation: dropIn .8s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  
-  /* Her item farklı swing + delay */
-  .deco-item:nth-child(1)  { animation: dropIn .8s .0s both, swing1 4.2s 1s ease-in-out infinite; }
-  .deco-item:nth-child(2)  { animation: dropIn .8s .1s both, swing2 5.0s 1s ease-in-out infinite; }
-  .deco-item:nth-child(3)  { animation: dropIn .8s .2s both, swing3 3.8s 1s ease-in-out infinite; }
-  .deco-item:nth-child(4)  { animation: dropIn .8s .3s both, swing4 4.6s 1s ease-in-out infinite; }
-  .deco-item:nth-child(5)  { animation: dropIn .8s .4s both, swing5 5.2s 1s ease-in-out infinite; }
-  .deco-item:nth-child(6)  { animation: dropIn .8s .5s both, swing1 4.8s 1s ease-in-out infinite; }
-  .deco-item:nth-child(7)  { animation: dropIn .8s .6s both, swing3 3.6s 1s ease-in-out infinite; }
-  .deco-item:nth-child(8)  { animation: dropIn .8s .7s both, swing2 4.4s 1s ease-in-out infinite; }
-  .deco-item:nth-child(9)  { animation: dropIn .8s .8s both, swing4 5.6s 1s ease-in-out infinite; }
-  .deco-item:nth-child(10) { animation: dropIn .8s .9s both, swing5 4.0s 1s ease-in-out infinite; }
-  
-  /* ── SVG BOYUTLARI ── */
-  .deco-item svg {
+  /* ── SVG ── */
+  .deco-swing svg {
     filter: drop-shadow(0 3px 8px rgba(201,168,76,.35))
             drop-shadow(0 1px 2px rgba(0,0,0,.4));
     display: block;
     flex-shrink: 0;
   }
   
-  /* Parlama efekti (fener için) */
   @keyframes lanternGlow {
-    0%,100% { filter:
-      drop-shadow(0 3px 10px rgba(201,168,76,.4))
-      drop-shadow(0 0 6px  rgba(255,200,50,.2)); }
-    50%     { filter:
-      drop-shadow(0 3px 16px rgba(201,168,76,.7))
-      drop-shadow(0 0 12px  rgba(255,200,50,.5)); }
+    0%,100% {
+      filter: drop-shadow(0 3px 10px rgba(201,168,76,.4))
+              drop-shadow(0 0  6px rgba(255,200,50,.2));
+    }
+    50% {
+      filter: drop-shadow(0 3px 18px rgba(201,168,76,.75))
+              drop-shadow(0 0 14px rgba(255,200,50,.55));
+    }
   }
   
-  .deco-item.is-lantern svg {
+  .deco-item.is-lantern .deco-swing svg {
     animation: lanternGlow 2.5s ease-in-out infinite;
   }
   
-  /* ── MOBİLDE KÜÇÜLT ── */
   @media (max-width: 600px) {
-    .deco-item svg { transform: scale(.72); transform-origin: top center; }
+    .deco-swing svg { transform: scale(.72); transform-origin: top center; }
     .deco-item::before { width: 1px; }
   }
   
