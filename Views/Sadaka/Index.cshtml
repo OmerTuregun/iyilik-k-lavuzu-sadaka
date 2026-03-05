@@ -1,0 +1,268 @@
+@{
+    ViewData["Title"] = "Gülümseni Paylaş";
+    int todayCount = ViewBag.TodayCount ?? 0;
+    int totalCount = ViewBag.TotalCount ?? 0;
+}
+@section Head {
+    <title>@ViewData["Title"] — Gülümsemek Sadakadır</title>
+}
+
+<div class="page-grain"></div>
+
+<!-- ════════════════════════════════ HERO HEADER ═══════════════════════════════ -->
+<header class="site-header">
+  <div class="header-bg-lines" aria-hidden="true">
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-eyebrow">
+        <span class="eyebrow-dot"></span>
+        hayırlı bir gün
+        <span class="eyebrow-dot"></span>
+      </div>
+      <h1 class="site-title">
+        Gülümsemek<br />
+        <em>Sadakadır</em>
+      </h1>
+      <p class="site-subtitle">Bir fotoğraf çek, bir sadaka bırak.</p>
+    </div>
+
+    <div class="header-right">
+      <blockquote class="hero-hadith">
+        <p>Kardeşinin yüzüne gülümsemen bile sana sadaka olarak yazılır.</p>
+        <cite>— Tirmizî, Birr 36</cite>
+      </blockquote>
+    </div>
+  </div>
+
+  <!-- STAT BAR -->
+  <div class="stat-bar">
+    <div class="stat-bar-inner">
+      <div class="stat-item">
+        <div class="stat-icon">😊</div>
+        <div class="stat-body">
+          <span class="stat-num" data-target="@todayCount" id="statToday">@todayCount</span>
+          <span class="stat-label">Bugün Yüklenen</span>
+        </div>
+      </div>
+      <div class="stat-divider" aria-hidden="true"></div>
+      <div class="stat-item">
+        <div class="stat-icon">🌍</div>
+        <div class="stat-body">
+          <span class="stat-num" data-target="@totalCount" id="statTotal">@totalCount</span>
+          <span class="stat-label">Toplam Gülümseme</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════ MAIN CONTENT ══════════════════════════════ -->
+<main class="site-main">
+  <div class="main-grid">
+
+    <!-- ── LEFT: Camera Column ── -->
+    <section class="camera-col" aria-label="Kamera">
+      <div class="col-eyebrow">
+        <span class="eyebrow-line"></span>
+        Gülümsemeni Paylaş
+        <span class="eyebrow-line"></span>
+      </div>
+
+      <!-- Camera Frame -->
+      <div class="camera-frame" id="cameraFrame">
+        <video id="videoEl" autoplay muted playsinline aria-label="Kamera görüntüsü"></video>
+        <canvas id="canvasEl" aria-hidden="true"></canvas>
+
+        <!-- Idle placeholder -->
+        <div class="camera-placeholder" id="cameraPlaceholder" aria-hidden="true">
+          <div class="placeholder-inner">
+            <div class="placeholder-ring">
+              <div class="placeholder-icon">📷</div>
+            </div>
+            <p>Kamera bekleniyor…</p>
+          </div>
+        </div>
+
+        <!-- Corner guides -->
+        <span class="corner-guide tl" aria-hidden="true"></span>
+        <span class="corner-guide tr" aria-hidden="true"></span>
+        <span class="corner-guide bl" aria-hidden="true"></span>
+        <span class="corner-guide br" aria-hidden="true"></span>
+
+        <!-- Countdown overlay -->
+        <div class="countdown-overlay" id="countdownOverlay" role="timer" aria-live="assertive">
+          <div class="countdown-ring" id="countdownRing">
+            <span class="countdown-num" id="countdownNum">3</span>
+          </div>
+        </div>
+
+        <!-- Flash -->
+        <div class="flash-overlay" id="flashOverlay" aria-hidden="true"></div>
+
+        <!-- Live indicator -->
+        <div class="live-badge" id="liveBadge" aria-label="Canlı kamera">
+          <span class="live-dot"></span> CANLI
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="camera-controls" id="ctrlStart">
+        <button class="btn btn-primary btn-wide" id="btnStart" onclick="startCamera()">
+          <span class="btn-icon">📷</span>
+          <span>Kamerayı Başlat</span>
+        </button>
+      </div>
+
+      <div class="camera-controls hidden" id="ctrlShoot">
+        <button class="btn btn-primary btn-grow" id="btnCountdown" onclick="startCountdown()">
+          <span class="btn-icon">⏱</span>
+          <span>3 Saniye Sonra Çek</span>
+        </button>
+        <button class="btn btn-ghost" onclick="shootNow()" title="Hemen çek" aria-label="Hemen çek">
+          <span>📸</span>
+        </button>
+        <button class="btn btn-danger" onclick="stopCamera()" title="Kamerayı kapat" aria-label="Kamerayı kapat">
+          <span>✕</span>
+        </button>
+      </div>
+
+      <!-- Photo Preview -->
+      <div class="photo-preview hidden" id="photoPreview">
+        <div class="preview-header">
+          <span class="preview-label">ÖNİZLEME</span>
+          <button class="btn btn-ghost btn-sm" onclick="retake()">
+            ↺ Yeniden Çek
+          </button>
+        </div>
+        <div class="preview-img-wrap">
+          <img id="previewImg" src="" alt="Çekilen fotoğrafın önizlemesi" />
+          <div class="preview-shimmer"></div>
+        </div>
+      </div>
+
+      <!-- Inline status -->
+      <div class="status-msg hidden" id="statusMsg" role="alert" aria-live="polite"></div>
+    </section>
+
+    <!-- ── RIGHT: Action Panel ── -->
+    <aside class="action-col" aria-label="Yükleme paneli">
+
+      <!-- ① Onay Kartı -->
+      <div class="panel-card consent-card">
+        <div class="card-header">
+          <div class="card-icon-wrap">📋</div>
+          <h2 class="card-title">Onay &amp; Gizlilik</h2>
+        </div>
+        <div class="card-body">
+
+          <label class="consent-row" for="consentStorage">
+            <div class="checkbox-wrap">
+              <input type="checkbox" id="consentStorage" class="consent-check" />
+              <span class="checkbox-custom" aria-hidden="true">
+                <svg viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="1,5 4.5,8.5 11,1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+            <span class="consent-text">
+              Fotoğrafımın <strong>projeye ait sunucularda</strong> güvenli biçimde depolanmasına izin veriyorum.
+            </span>
+          </label>
+
+          <div class="consent-row info-only">
+            <div class="checkbox-wrap checkbox-empty" aria-hidden="true"></div>
+            <span class="consent-text">
+              İyilik Kılavuzu Programı hakkında detaylı bilgi için
+              <a class="consent-link"
+                 href="https://www.kocaeli.bel.tr/haber/iyilik-kilavuzu-kocaeline-yepyeni-bir-boyut-kazandiracak-47403.html"
+                 target="_blank" rel="noopener noreferrer">
+                 tıklayınız
+              </a>.
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ② Upload -->
+      <div class="panel-card upload-card">
+        <button class="btn-upload" id="btnUpload" disabled onclick="doUpload()" aria-disabled="true">
+          <span class="upload-icon">☁️</span>
+          <span class="upload-label">Gülümsemeni Yükle</span>
+          <span class="upload-arrow">→</span>
+        </button>
+
+        <div class="progress-track hidden" id="progressTrack">
+          <div class="progress-fill" id="progressFill"></div>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+
+        <p class="upload-note" id="uploadNote">
+          Fotoğraf çekip üç onayı işaretledikten sonra aktif olur
+        </p>
+      </div>
+
+      @* <!-- ③ Gallery -->
+      <div class="panel-card gallery-card">
+        <div class="card-header">
+          <div class="card-icon-wrap">🖼️</div>
+          <h2 class="card-title">Son Gülümsemeler</h2>
+          <span class="card-badge">BULANIK</span>
+        </div>
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- JS tarafından doldurulur -->
+        </div>
+        <p class="gallery-hint">Üzerine gel → netleşir</p>
+      </div> *@
+
+      <!-- ④ Share -->
+      <div class="panel-card share-card">
+        <p class="share-quote">
+          "Sen de bir <em>sadaka</em> bırak."
+        </p>
+        <p class="share-sub">Bu sayfayı arkadaşlarına ulaştır, iyiliğe ortak ol.</p>
+        <div class="share-buttons">
+          <button class="btn-share" id="btnShare" onclick="copyShareLink()">
+            🔗 Linki Kopyala
+          </button>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</main>
+
+<!-- ════════════════════════════════ SUCCESS MODAL ═════════════════════════════ -->
+<div class="modal-backdrop hidden" id="successModal" role="dialog" aria-modal="true" aria-label="Başarılı yükleme">
+  <div class="modal-card">
+    <div class="modal-icon-wrap">
+      <div class="modal-icon">😊</div>
+      <div class="modal-icon-ring" aria-hidden="true"></div>
+    </div>
+    <h2 class="modal-title">Gülümsemen Yüklendi!</h2>
+    <p class="modal-body">
+      Sadakan kabul olsun. Bir gülümseme bazen birileri için en büyük hediyedir.
+    </p>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <span class="modal-stat-num" id="modalTodayNum">—</span>
+        <span class="modal-stat-label">Bugün</span>
+      </div>
+      <div class="modal-stat-div" aria-hidden="true"></div>
+      <div class="modal-stat">
+        <span class="modal-stat-num" id="modalTotalNum">—</span>
+        <span class="modal-stat-label">Toplam</span>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-wide" onclick="resetAll()">
+      <span class="btn-icon">↺</span>
+      Tekrar Gülümse
+    </button>
+  </div>
+</div>
+
+<!-- CONFETTI CANVAS -->
+<canvas id="confettiCanvas" aria-hidden="true"></canvas>

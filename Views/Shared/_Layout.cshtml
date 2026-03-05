@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gülümsemek sadakadır — bir gülümseni paylaş, sadakana ortak et." />
+  <meta name="theme-color" content="#1a4a4a" />
+  <title>@ViewData["Title"] — Gülümsemek Sadakadır</title>
+
+  <!-- Fonts: Cormorant Garamond (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+  @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+
+  @RenderBody()
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-ornament">✦</span>
+        <span class="footer-name">Gülümsemek Sadakadır</span>
+        <span class="footer-ornament">✦</span>
+      </div>
+      <p class="footer-hadith">
+        "Kardeşinin yüzüne gülümsemen bile sana sadaka olarak yazılır."
+        <em>— Tirmizî, Birr 36</em>
+      </p>
+      <p class="footer-copy">&copy; @DateTime.Now.Year — Her hakkı saklıdır</p>
+    </div>
+  </footer>
+
+  <script src="~/js/site.js" asp-append-version="true"></script>
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

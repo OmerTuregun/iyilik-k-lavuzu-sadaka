@@ -1,0 +1,43 @@
+# Build çıktıları
+bin/
+obj/
+out/
+**/Debug/
+**/Release/
+
+# Rider / VS / VS Code
+.vs/
+.idea/
+.vscode/
+
+# Kullanıcı ve config dosyaları
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Log ve temp
+*.log
+logs/
+*.tmp
+*.temp
+
+# Paketler
+packages/
+*.nupkg
+
+# Docker ile oluşan dosyalar
+*.pid
+docker-data/
+minio-data/
+
+# OS spesifik
+.DS_Store
+Thumbs.db
+
+# Publish çıktısı (eğer repo içinde tutmak istemezsen)
+publish/
+
+# Ortam değişkenleri
+.env
+.env.*
