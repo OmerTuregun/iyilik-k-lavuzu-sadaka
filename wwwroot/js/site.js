@@ -1,482 +1,547 @@
-/**
- * Gülümsemek Sadakadır — site.js
- * Camera → Countdown → Shoot → Consent → Upload → Confetti
- */
-
-'use strict';
-
-/* ── DOM REFS ──────────────────────────────────────────────── */
-const $ = id => document.getElementById(id);
-
-const videoEl         = $('videoEl');
-const canvasEl        = $('canvasEl');
-const cameraFrame     = $('cameraFrame');
-const cameraPlaceholder = $('cameraPlaceholder');
-const liveBadge       = $('liveBadge');
-const countdownOverlay = $('countdownOverlay');
-const countdownNum    = $('countdownNum');
-const countdownRing   = $('countdownRing');
-const flashOverlay    = $('flashOverlay');
-const ctrlStart       = $('ctrlStart');
-const ctrlShoot       = $('ctrlShoot');
-const photoPreview    = $('photoPreview');
-const previewImg      = $('previewImg');
-const statusMsg       = $('statusMsg');
-const btnUpload       = $('btnUpload');
-const progressTrack   = $('progressTrack');
-const progressFill    = $('progressFill');
-const progressPct     = $('progressPct');
-const successModal    = $('successModal');
-const modalTodayNum   = $('modalTodayNum');
-const modalTotalNum   = $('modalTotalNum');
-const confettiCanvas  = $('confettiCanvas');
-const galleryGrid     = $('galleryGrid');
-const uploadNote      = $('uploadNote');
-
-// Yükleme için zorunlu onay kutuları (sadece depolama izni)
-const CHECKBOXES = ['consentStorage'];
-
-/* ── STATE ─────────────────────────────────────────────────── */
-let stream         = null;
-let capturedBlob   = null;
-let countdownTimer = null;
-
-/* ── INIT ───────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-  animateCounters();
-  buildGallery();
-  CHECKBOXES.forEach(id => $(id).addEventListener('change', checkUploadReady));
-});
-
-/* ── COUNTER ANIMATION ──────────────────────────────────────── */
-function animateCounters() {
-  document.querySelectorAll('.stat-num[data-target]').forEach(el => {
-    const target = parseInt(el.dataset.target, 10);
-    if (isNaN(target)) return;
-    el.textContent = '0';
-    let current = 0;
-    const duration = 1200;
-    const startTime = performance.now();
-
-    function tick(now) {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      current = Math.round(eased * target);
-      el.textContent = current.toLocaleString('tr-TR');
-      if (progress < 1) requestAnimationFrame(tick);
-    }
-
-    // Delay per element for stagger
-    const delay = parseInt(el.id.replace(/\D/g, ''), 10) || 0;
-    setTimeout(() => requestAnimationFrame(tick), 300 + delay * 80);
-  });
-}
-
-/* ── GALLERY (mock thumbnails) ──────────────────────────────── */
-const GALLERY_ITEMS = [
-  { bg: '#1a4a4a', emoji: '😊' },
-  { bg: '#2d6b6b', emoji: '🙂' },
-  { bg: '#3a8080', emoji: '😄' },
-  { bg: '#1f5858', emoji: '😁' },
-  { bg: '#4a9595', emoji: '🌟' },
-  { bg: '#1a4a4a', emoji: '✨' },
-  { bg: '#3d8585', emoji: '💛' },
-  { bg: '#2a6060', emoji: '🌸' },
-];
-
-function buildGallery() {
-  if (!galleryGrid) return;
-  galleryGrid.innerHTML = '';
-  GALLERY_ITEMS.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'gallery-thumb';
-    div.innerHTML = `
-      <div class="gallery-thumb-img" style="background:${item.bg};width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;filter:blur(7px) brightness(.85);transition:filter .35s;"></div>
-      <div class="gallery-thumb-overlay">${item.emoji}</div>
-    `;
-    // hover clear
-    div.addEventListener('mouseenter', () => {
-      div.querySelector('.gallery-thumb-img').style.filter = 'none';
-    });
-    div.addEventListener('mouseleave', () => {
-      div.querySelector('.gallery-thumb-img').style.filter = 'blur(7px) brightness(.85)';
-    });
-    galleryGrid.appendChild(div);
-  });
-}
-
-
-/* ── CAMERA ─────────────────────────────────────────────────── */
-async function startCamera() {
-  hideStatus();
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
-      audio: false,
-    });
-    videoEl.srcObject = stream;
-    await videoEl.play();
-
-    cameraPlaceholder.classList.add('hidden');
-    videoEl.classList.add('active');
-    liveBadge.classList.add('show');
-
-    ctrlStart.classList.add('hidden');
-    ctrlShoot.classList.remove('hidden');
-  } catch (err) {
-    showStatus('error', '⚠️ Kamera erişimi sağlanamadı. Lütfen tarayıcı kamera iznini kontrol edin.');
-    console.error('[Camera]', err);
-  }
-}
-window.startCamera = startCamera;
-
-function stopCamera() {
-  clearCountdown();
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-  videoEl.srcObject = null;
-  videoEl.classList.remove('active');
-  cameraPlaceholder.classList.remove('hidden');
-  liveBadge.classList.remove('show');
-  ctrlShoot.classList.add('hidden');
-  ctrlStart.classList.remove('hidden');
-}
-window.stopCamera = stopCamera;
-
-/* ── COUNTDOWN ──────────────────────────────────────────────── */
-function startCountdown() {
-  let n = 3;
-  setCountdownNum(n);
-  countdownOverlay.classList.add('active');
-
-  countdownTimer = setInterval(() => {
-    n--;
-    if (n > 0) {
-      setCountdownNum(n);
-    } else {
-      clearCountdown();
-      shootNow();
-    }
-  }, 1000);
-}
-window.startCountdown = startCountdown;
-
-function setCountdownNum(n) {
-  countdownNum.textContent = n;
-  // Restart animation
-  countdownRing.style.animation = 'none';
-  countdownNum.style.animation  = 'none';
-  void countdownNum.offsetHeight; // reflow
-  countdownRing.style.animation = 'cdRing 1s var(--ease-out)';
-  countdownNum.style.animation  = 'cdNum 1s var(--ease-out)';
-}
-
-function clearCountdown() {
-  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
-  countdownOverlay.classList.remove('active');
-}
-
-/* ── SHOOT ───────────────────────────────────────────────────── */
-function shootNow() {
-  clearCountdown();
-  if (!stream) return;
-
-  // Flash effect
-  triggerFlash();
-
-  // Shutter sound
-  playShutter();
-
-  // Capture frame
-  canvasEl.width  = videoEl.videoWidth  || 1280;
-  canvasEl.height = videoEl.videoHeight || 960;
-  const ctx = canvasEl.getContext('2d');
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(videoEl, -canvasEl.width, 0, canvasEl.width, canvasEl.height);
-  ctx.restore();
-
-  canvasEl.toBlob(blob => {
-    capturedBlob = blob;
-    const url = URL.createObjectURL(blob);
-    previewImg.src = url;
-    photoPreview.classList.remove('hidden');
-    checkUploadReady();
-  }, 'image/jpeg', 0.90);
-
-  stopCamera();
-}
-window.shootNow = shootNow;
-
-function retake() {
-  capturedBlob = null;
-  photoPreview.classList.add('hidden');
-  previewImg.src = '';
-  checkUploadReady();
-  startCamera();
-}
-window.retake = retake;
-
-function triggerFlash() {
-  flashOverlay.classList.add('active');
-  setTimeout(() => flashOverlay.classList.remove('active'), 100);
-}
-
-/* ── SHUTTER SOUND ───────────────────────────────────────────── */
-function playShutter() {
-  try {
-    const ac  = new (window.AudioContext || window.webkitAudioContext)();
-    const buf = ac.createBuffer(1, ac.sampleRate * 0.09, ac.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      const decay = 1 - i / data.length;
-      data[i] = (Math.random() * 2 - 1) * decay * decay;
-    }
-    const src  = ac.createBufferSource();
-    src.buffer = buf;
-    const gain = ac.createGain();
-    gain.gain.value = 0.2;
-    src.connect(gain);
-    gain.connect(ac.destination);
-    src.start();
-    src.onended = () => ac.close();
-  } catch (_) { /* ignore */ }
-}
-
-/* ── CONSENT CHECK ───────────────────────────────────────────── */
-function checkUploadReady() {
-  const allChecked = CHECKBOXES.every(id => $(id).checked);
-  const ready = !!(capturedBlob && allChecked);
-  btnUpload.disabled = !ready;
-  btnUpload.setAttribute('aria-disabled', !ready);
-
-  if (ready) {
-    uploadNote.textContent = 'Her şey hazır — gülümseni yükle!';
-    uploadNote.style.color = 'var(--petrol-700)';
-    uploadNote.style.opacity = '1';
-  } else {
-    uploadNote.textContent = 'Fotoğraf çekip onayı işaretledikten sonra aktif olur';
-    uploadNote.style.color  = '';
-    uploadNote.style.opacity = '';
-  }
-}
-
-/* ── UPLOAD ─────────────────────────────────────────────────── */
-async function doUpload() {
-  if (!capturedBlob) return;
-  btnUpload.disabled = true;
-  hideStatus();
-
-  progressTrack.classList.remove('hidden');
-  setProgress(0);
-
-  const formData = new FormData();
-  formData.append('photo', capturedBlob, `smile_${Date.now()}.jpg`);
-
-  // Simüle eden ilerleyici progress
-  let fakeProgress = 0;
-  const fakeTimer = setInterval(() => {
-    fakeProgress = Math.min(fakeProgress + Math.random() * 12, 88);
-    setProgress(fakeProgress);
-  }, 150);
-
-  try {
-    const response = await fetch('/Sadaka/Upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    clearInterval(fakeTimer);
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'Sunucu hatası');
-    }
-
-    const data = await response.json();
-
-    setProgress(100);
-    await sleep(300);
-
-    // Update live counters
-    if (data.todayCount) animateNum($('statToday'), data.todayCount);
-    if (data.totalCount) animateNum($('statTotal'), data.totalCount);
-
-    // Show modal
-    if (data.todayCount) modalTodayNum.textContent = data.todayCount.toLocaleString('tr-TR');
-    if (data.totalCount) modalTotalNum.textContent = data.totalCount.toLocaleString('tr-TR');
-
-    setTimeout(showSuccess, 200);
-
-  } catch (err) {
-    clearInterval(fakeTimer);
-    progressTrack.classList.add('hidden');
-    setProgress(0);
-    btnUpload.disabled = false;
-    showStatus('error', `⚠️ ${err.message || 'Yükleme sırasında bir hata oluştu.'}`);
-  }
-}
-window.doUpload = doUpload;
-
-function setProgress(pct) {
-  const clamped = Math.max(0, Math.min(100, Math.round(pct)));
-  progressFill.style.width = clamped + '%';
-  progressPct.textContent  = clamped + '%';
-}
-
-/* ── SUCCESS ─────────────────────────────────────────────────── */
-function showSuccess() {
-  progressTrack.classList.add('hidden');
-  setProgress(0);
-  successModal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-  launchConfetti();
-}
-
-function resetAll() {
-  successModal.classList.add('hidden');
-  document.body.style.overflow = '';
-
-  capturedBlob = null;
-  previewImg.src = '';
-  photoPreview.classList.add('hidden');
-
-  CHECKBOXES.forEach(id => { $(id).checked = false; });
-  checkUploadReady();
-
-  hideStatus();
-  progressTrack.classList.add('hidden');
-  setProgress(0);
-
-  ctrlStart.classList.remove('hidden');
-  ctrlShoot.classList.add('hidden');
-  cameraPlaceholder.classList.remove('hidden');
-  videoEl.classList.remove('active');
-
-  buildGallery(); // refresh with mock
-}
-window.resetAll = resetAll;
-
-/* ── STATUS ──────────────────────────────────────────────────── */
-function showStatus(type, msg) {
-  statusMsg.className = `status-msg ${type}`;
-  statusMsg.textContent = msg;
-  statusMsg.classList.remove('hidden');
-}
-
-function hideStatus() {
-  statusMsg.classList.add('hidden');
-  statusMsg.textContent = '';
-}
-
-/* ── SHARE ───────────────────────────────────────────────────── */
-function copyShareLink() {
-  const url  = window.location.href;
-  const btn  = $('btnShare');
-  const orig = btn.innerHTML;
-
-  navigator.clipboard.writeText(url)
-    .then(() => {
-      btn.innerHTML = '✅ Kopyalandı!';
-      setTimeout(() => { btn.innerHTML = orig; }, 2200);
-    })
-    .catch(() => {
-      try { prompt('Bu linki kopyalayın:', url); }
-      catch (_) {}
-    });
-}
-window.copyShareLink = copyShareLink;
-
-/* ── COUNTER ANIMATE ─────────────────────────────────────────── */
-function animateNum(el, target) {
-  if (!el) return;
-  const start  = parseInt(el.textContent.replace(/\D/g, ''), 10) || 0;
-  const dur    = 600;
-  const t0     = performance.now();
-  function tick(now) {
-    const p = Math.min((now - t0) / dur, 1);
-    el.textContent = Math.round(start + (target - start) * (1 - Math.pow(1 - p, 3))).toLocaleString('tr-TR');
-    if (p < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-/* ── CONFETTI ────────────────────────────────────────────────── */
-function launchConfetti() {
-  const cvs = confettiCanvas;
-  const ctx = cvs.getContext('2d');
-  cvs.width  = window.innerWidth;
-  cvs.height = window.innerHeight;
-
-  const PALETTE = [
-    '#1a4a4a', '#2d6b6b', '#4a9595',
-    '#c9a84c', '#d9be6e', '#e8cc82',
-    '#f5efe6', '#e8ddd0', '#c9b99a',
-    '#ffffff',
-  ];
-
-  const SHAPES = ['rect', 'circle', 'strip'];
-
-  const pieces = Array.from({ length: 140 }, () => ({
-    x:     Math.random() * cvs.width,
-    y:     -(Math.random() * cvs.height * 0.5),
-    w:     Math.random() * 10 + 5,
-    h:     Math.random() * 6  + 3,
-    rot:   Math.random() * Math.PI * 2,
-    vx:    (Math.random() - 0.5) * 2.5,
-    vy:    Math.random() * 3.5 + 1.5,
-    vr:    (Math.random() - 0.5) * 0.18,
-    color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-    shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
-  }));
-
-  let frame = 0;
-  const MAX  = 280;
-
-  function draw() {
-    ctx.clearRect(0, 0, cvs.width, cvs.height);
-    const alpha = Math.max(0, 1 - frame / MAX);
-
-    pieces.forEach(p => {
-      p.x  += p.vx;
-      p.y  += p.vy;
-      p.rot += p.vr;
-      p.vy  += 0.055;
-      if (p.y > cvs.height + 20) {
-        p.y = -20;
-        p.x = Math.random() * cvs.width;
-      }
-
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-
-      if (p.shape === 'rect') {
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      } else if (p.shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        // strip
-        ctx.fillRect(-p.w / 2, -1.5, p.w, 3);
-      }
-      ctx.restore();
-    });
-
-    frame++;
-    if (frame < MAX) requestAnimationFrame(draw);
-    else ctx.clearRect(0, 0, cvs.width, cvs.height);
-  }
-
-  requestAnimationFrame(draw);
-}
-
-/* ── UTILS ───────────────────────────────────────────────────── */
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* ═══════════════════════════════════════════════════════════════
+   GLOBALS
+   ═══════════════════════════════════════════════════════════════ */
+   const $ = id => document.getElementById(id);
+   const $$$ = sel => document.querySelectorAll(sel);
+   
+   let currentUser = null;
+   let stream = null;
+   let currentFacingMode = 'user'; // 'user' (ön kamera) veya 'environment' (arka kamera)
+   let photoData = null;
+   let waitTimerInterval = null;
+   
+   const CHECKBOXES = ['consentStorage'];
+   
+   /* ═══════════════════════════════════════════════════════════════
+      AUTH MODAL
+      ═══════════════════════════════════════════════════════════════ */
+   function initAuth() {
+     const stored = localStorage.getItem('sadaka_user');
+     if (stored) {
+       try {
+         currentUser = JSON.parse(stored);
+         hideAuthModal();
+         refreshUserStats();
+         return;
+       } catch (e) {
+         localStorage.removeItem('sadaka_user');
+       }
+     }
+     showAuthModal();
+   }
+   
+   function showAuthModal() { $('authModal')?.classList.remove('hidden'); }
+   function hideAuthModal()  { $('authModal')?.classList.add('hidden'); }
+   
+   function switchTab(tabName) {
+     $$$('.auth-tab').forEach(t => t.classList.remove('active'));
+     $$$('.auth-form').forEach(f => f.classList.add('hidden'));
+     $(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`)?.classList.add('active');
+     $(`form${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`)?.classList.remove('hidden');
+   }
+   $$$('.auth-tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+   
+   $('formRegister')?.addEventListener('submit', async (e) => {
+     e.preventDefault();
+     const statusEl = $('registerStatus');
+     const displayName = $('regDisplayName').value.trim();
+     const pin = $('regPin').value.trim();
+     if (!displayName || pin.length !== 4) {
+       statusEl.textContent = 'Lütfen isim ve 4 haneli PIN girin.';
+       statusEl.className = 'auth-status error';
+       return;
+     }
+     statusEl.textContent = 'Kaydediliyor...';
+     statusEl.className = 'auth-status';
+     try {
+       const res = await fetch('/Sadaka/Register', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ displayName, pin })
+       });
+       const data = await res.json();
+       if (data.success) {
+         currentUser = { userId: data.userId, displayName: data.displayName, totalPoints: data.totalPoints ?? 0, currentStreak: data.currentStreak ?? 0 };
+         localStorage.setItem('sadaka_user', JSON.stringify(currentUser));
+         statusEl.textContent = data.message || 'Kayıt başarılı!';
+         statusEl.className = 'auth-status success';
+         setTimeout(() => { hideAuthModal(); updatePointsDisplay(); refreshUserStats(); }, 800);
+       } else {
+         statusEl.textContent = data.message || 'Kayıt başarısız.';
+         statusEl.className = 'auth-status error';
+       }
+     } catch { statusEl.textContent = 'Bağlantı hatası.'; statusEl.className = 'auth-status error'; }
+   });
+   
+   $('formLogin')?.addEventListener('submit', async (e) => {
+     e.preventDefault();
+     const statusEl = $('loginStatus');
+     const displayName = $('loginDisplayName').value.trim();
+     const pin = $('loginPin').value.trim();
+     if (!displayName || pin.length !== 4) {
+       statusEl.textContent = 'Lütfen isim ve 4 haneli PIN girin.';
+       statusEl.className = 'auth-status error';
+       return;
+     }
+     statusEl.textContent = 'Giriş yapılıyor...';
+     statusEl.className = 'auth-status';
+     try {
+       const res = await fetch('/Sadaka/Login', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ displayName, pin })
+       });
+       const data = await res.json();
+       if (data.success) {
+         currentUser = { userId: data.userId, displayName: data.displayName, totalPoints: data.totalPoints ?? 0, currentStreak: data.currentStreak ?? 0 };
+         localStorage.setItem('sadaka_user', JSON.stringify(currentUser));
+         statusEl.textContent = 'Giriş başarılı!';
+         statusEl.className = 'auth-status success';
+         setTimeout(() => { hideAuthModal(); updatePointsDisplay(); refreshUserStats(); }, 800);
+       } else {
+         statusEl.textContent = data.message || 'Giriş başarısız.';
+         statusEl.className = 'auth-status error';
+       }
+     } catch { statusEl.textContent = 'Bağlantı hatası.'; statusEl.className = 'auth-status error'; }
+   });
+   
+   $$$('input[pattern="[0-9]{4}"]').forEach(input => {
+     input.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
+   });
+   
+   /* ═══════════════════════════════════════════════════════════════
+      LİMİT MODAL
+      ═══════════════════════════════════════════════════════════════ */
+   function showLimitModal(streak) {
+     const streakInfo = $('limitStreakInfo');
+     const streakBadge = $('limitStreakBadge');
+     if (streak > 0 && streakInfo && streakBadge) {
+       streakBadge.textContent = `🔥 ${streak} Günlük Serinin Var!`;
+       streakInfo.style.display = 'block';
+     } else if (streakInfo) {
+       streakInfo.style.display = 'none';
+     }
+     $('limitModal')?.classList.remove('hidden');
+   }
+   
+   function closeLimitModal() { $('limitModal')?.classList.add('hidden'); }
+   window.closeLimitModal = closeLimitModal;
+   
+   /* ═══════════════════════════════════════════════════════════════
+      BEKLEME MODAL — geri sayım ile
+      ═══════════════════════════════════════════════════════════════ */
+   function showWaitModal(totalSeconds) {
+     let remaining = totalSeconds;
+   
+     function updateDisplay() {
+       const h = Math.floor(remaining / 3600);
+       const m = Math.floor((remaining % 3600) / 60);
+       const s = remaining % 60;
+       $('waitHours').textContent   = String(h).padStart(2, '0');
+       $('waitMinutes').textContent = String(m).padStart(2, '0');
+       $('waitSeconds').textContent = String(s).padStart(2, '0');
+     }
+   
+     // Önceki timer varsa temizle
+     if (waitTimerInterval) clearInterval(waitTimerInterval);
+   
+     updateDisplay();
+     $('waitModal')?.classList.remove('hidden');
+   
+     waitTimerInterval = setInterval(() => {
+       remaining--;
+       if (remaining <= 0) {
+         clearInterval(waitTimerInterval);
+         waitTimerInterval = null;
+         closeWaitModal();
+         // Süre doldu — kamerayı otomatik aç
+         openCameraDirectly();
+       } else {
+         updateDisplay();
+       }
+     }, 1000);
+   }
+   
+   function closeWaitModal() {
+     $('waitModal')?.classList.add('hidden');
+     // Modal kapatılınca timer çalışmaya devam etsin ama modal görünmesin
+   }
+   
+   window.closeWaitModal = closeWaitModal;
+   
+   /* ═══════════════════════════════════════════════════════════════
+      PUAN & STREAK GÜNCELLEME
+      ═══════════════════════════════════════════════════════════════ */
+   function updatePointsDisplay(points, streak) {
+     const p = points !== undefined ? points : (currentUser?.totalPoints ?? null);
+     const s = streak !== undefined ? streak : (currentUser?.currentStreak ?? 0);
+   
+     const statPoints = $('statPoints');
+     if (statPoints && p !== null) animateCounter(statPoints, p);
+   
+     const streakCard = $('streakCard');
+     if (streakCard && p !== null) {
+       streakCard.classList.remove('hidden');
+       const streakNum = $('streakNum');
+       const streakFire = $('streakFire');
+       const pointsNum = $('pointsNum');
+       const multiplierEl = $('streakMultiplier');
+       if (streakNum) streakNum.textContent = s;
+       if (pointsNum) animateCounter(pointsNum, p);
+       if (streakFire) streakFire.textContent = s >= 3 ? '🔥' : s >= 1 ? '✨' : '⭐';
+       if (multiplierEl) {
+         const txt = { 0:'', 1:'1× puan', 2:'1.5× puan (seri bonusu!)', 3:'2× puan (seri bonusu!)', 4:'2.5× puan (seri bonusu!)' };
+         const text = s >= 5 ? '3× puan (maksimum bonus! 🏆)' : (txt[s] ?? '');
+         multiplierEl.textContent = text;
+         multiplierEl.style.display = text ? 'block' : 'none';
+       }
+     }
+   }
+   
+   async function refreshUserStats() {
+     if (!currentUser?.userId) return;
+     try {
+       const res = await fetch(`/Sadaka/UserStats/${currentUser.userId}`);
+       if (res.ok) {
+         const data = await res.json();
+         currentUser.totalPoints = data.totalPoints;
+         currentUser.currentStreak = data.currentStreak;
+         localStorage.setItem('sadaka_user', JSON.stringify(currentUser));
+         updatePointsDisplay(data.totalPoints, data.currentStreak);
+       }
+     } catch { /* sessizce geç */ }
+   }
+   
+   /* ═══════════════════════════════════════════════════════════════
+      CAMERA — önce durum kontrolü
+      ═══════════════════════════════════════════════════════════════ */
+   async function startCamera() {
+     if (!currentUser) { showAuthModal(); return; }
+   
+     // Sunucudan durum kontrolü
+     try {
+       const res = await fetch(`/Sadaka/CheckStatus/${currentUser.userId}`);
+       if (res.ok) {
+         const status = await res.json();
+   
+         // Günlük limit doldu
+         if (status.dailyLimitReached) {
+           showLimitModal(currentUser.currentStreak ?? 0);
+           return;
+         }
+   
+         // 1 saat dolmadı
+         if (status.waitSeconds > 0) {
+           showWaitModal(status.waitSeconds);
+           return;
+         }
+       }
+     } catch { /* kontrol edilemedi, yine de kamerayı aç */ }
+   
+     openCameraDirectly();
+   }
+   
+   async function openCameraDirectly() {
+     try {
+       // Mevcut akışı kapat (yeniden başlatma veya kamera değiştirme durumunda)
+       if (stream) {
+         stream.getTracks().forEach(t => t.stop());
+         stream = null;
+       }
+
+       stream = await navigator.mediaDevices.getUserMedia({
+         video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+         audio: false
+       });
+       const video = $('videoEl');
+       video.srcObject = stream;
+       video.classList.add('active');
+       $('cameraPlaceholder').classList.add('hidden');
+       $('liveBadge').classList.add('show');
+       $('ctrlStart').classList.add('hidden');
+       $('ctrlShoot').classList.remove('hidden');
+     } catch {
+       showStatus('Kamera erişimi reddedildi veya bulunamadı.', 'error');
+     }
+   }
+
+   async function toggleCameraFacing() {
+     // Ön/arka kamera arasında geçiş yap
+     currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+     await openCameraDirectly();
+   }
+   
+   function stopCamera() {
+     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+     const video = $('videoEl');
+     video.srcObject = null;
+     video.classList.remove('active');
+     $('cameraPlaceholder').classList.remove('hidden');
+     $('liveBadge').classList.remove('show');
+     $('ctrlStart').classList.remove('hidden');
+     $('ctrlShoot').classList.add('hidden');
+     $('photoPreview').classList.add('hidden');
+     photoData = null;
+     checkUploadReady();
+   }
+   
+   function startCountdown() {
+     const overlay = $('countdownOverlay');
+     const numEl = $('countdownNum');
+     overlay.classList.add('active');
+     let count = 3;
+     numEl.textContent = count;
+     const interval = setInterval(() => {
+       count--;
+       if (count <= 0) { clearInterval(interval); overlay.classList.remove('active'); shootPhoto(); }
+       else numEl.textContent = count;
+     }, 1000);
+   }
+   
+   function shootNow() { shootPhoto(); }
+   
+   function shootPhoto() {
+     const video = $('videoEl');
+     const canvas = $('canvasEl');
+     const ctx = canvas.getContext('2d');
+     canvas.width = video.videoWidth;
+     canvas.height = video.videoHeight;
+
+     // Selfie (ön kamera) için aynalı görüntü, arka kamera için normal görüntü
+     if (currentFacingMode === 'user') {
+       ctx.translate(canvas.width, 0);
+       ctx.scale(-1, 1);
+     }
+
+     ctx.drawImage(video, 0, 0);
+     canvas.toBlob((blob) => {
+       photoData = blob;
+       $('previewImg').src = URL.createObjectURL(blob);
+       $('photoPreview').classList.remove('hidden');
+       $('ctrlShoot').classList.add('hidden');
+       const flash = $('flashOverlay');
+       flash.classList.add('active');
+       setTimeout(() => flash.classList.remove('active'), 100);
+       checkUploadReady();
+     }, 'image/jpeg', 0.92);
+   }
+   
+   function retake() {
+     $('photoPreview').classList.add('hidden');
+     photoData = null;
+     $('ctrlShoot').classList.remove('hidden');
+     checkUploadReady();
+   }
+   
+   window.startCamera = startCamera;
+   window.startCountdown = startCountdown;
+   window.shootNow = shootNow;
+   window.stopCamera = stopCamera;
+   window.retake = retake;
+   window.toggleCameraFacing = toggleCameraFacing;
+   
+   /* ═══════════════════════════════════════════════════════════════
+      UPLOAD
+      ═══════════════════════════════════════════════════════════════ */
+   function checkUploadReady() {
+     if (!currentUser) {
+       $('btnUpload').disabled = true;
+       $('uploadNote').textContent = 'Önce giriş yapmalısın.';
+       return;
+     }
+     const allChecked = CHECKBOXES.every(id => $(id)?.checked);
+     const hasPhoto = photoData !== null;
+     $('btnUpload').disabled = !(allChecked && hasPhoto);
+     $('uploadNote').textContent = allChecked && hasPhoto
+       ? 'Yüklemeye hazır!'
+       : 'Fotoğraf çekip onayı işaretledikten sonra aktif olur';
+   }
+   
+   CHECKBOXES.forEach(id => $(id)?.addEventListener('change', checkUploadReady));
+   
+   async function doUpload() {
+     if (!currentUser || !photoData) {
+       showStatus('Lütfen önce giriş yap ve fotoğraf çek.', 'error');
+       return;
+     }
+   
+     const formData = new FormData();
+     formData.append('photo', photoData, 'tebessum.jpg');
+     formData.append('userId', currentUser.userId);
+   
+     const btn = $('btnUpload');
+     const progressTrack = $('progressTrack');
+     const progressFill = $('progressFill');
+     const progressPct = $('progressPct');
+   
+     btn.disabled = true;
+     progressTrack.classList.remove('hidden');
+   
+     try {
+       const xhr = new XMLHttpRequest();
+   
+       xhr.upload.addEventListener('progress', (e) => {
+         if (e.lengthComputable) {
+           const pct = Math.round((e.loaded / e.total) * 100);
+           progressFill.style.width = pct + '%';
+           progressPct.textContent = pct + '%';
+         }
+       });
+   
+       xhr.addEventListener('load', () => {
+         const data = JSON.parse(xhr.responseText);
+   
+         // Günlük limit
+         if (xhr.status === 400 && data.dailyLimitReached) {
+           progressTrack.classList.add('hidden');
+           btn.disabled = false;
+           showLimitModal(currentUser?.currentStreak ?? 0);
+           return;
+         }
+   
+         // 1 saat bekleme (çift güvenlik — normalde kamera açılmadan yakalanır)
+         if (xhr.status === 400 && data.waitRequired) {
+           progressTrack.classList.add('hidden');
+           btn.disabled = false;
+           showWaitModal(data.waitSeconds ?? 3600);
+           return;
+         }
+   
+         if (xhr.status === 200 && data.success) {
+           progressFill.style.width = '100%';
+           progressPct.textContent = '100%';
+   
+           // Stat bar güncelle
+           if (data.todayCount !== undefined) animateCounter($('statToday'), data.todayCount);
+           if (data.totalCount !== undefined) animateCounter($('statTotal'), data.totalCount);
+   
+           // Puan güncelle
+           if (data.totalPoints !== undefined) {
+             currentUser.totalPoints = data.totalPoints;
+             currentUser.currentStreak = data.currentStreak ?? currentUser.currentStreak;
+             localStorage.setItem('sadaka_user', JSON.stringify(currentUser));
+             updatePointsDisplay(data.totalPoints, data.currentStreak);
+           }
+   
+           // Success modal
+           $('modalTodayNum').textContent = data.todayCount ?? '—';
+           $('modalTotalNum').textContent = data.totalCount ?? '—';
+           $('modalPointsNum').textContent = data.totalPoints ?? '—';
+   
+           // Her yüklemede puan göster
+           const earnedEl = $('modalPointsEarned');
+           const earnedNum = $('modalPointsEarnedNum');
+           if (data.pointsEarned > 0 && earnedEl) {
+             earnedNum.textContent = `+${data.pointsEarned}`;
+             earnedEl.classList.remove('hidden');
+           } else if (earnedEl) {
+             earnedEl.classList.add('hidden');
+           }
+   
+           // Streak bilgisi
+           const streakEl = $('modalStreak');
+           const streakText = $('modalStreakText');
+           if (data.currentStreak > 1 && streakEl) {
+             streakText.textContent = `🔥 ${data.currentStreak} Günlük Serin Var!`;
+             streakEl.classList.remove('hidden');
+           } else if (streakEl) {
+             streakEl.classList.add('hidden');
+           }
+   
+           $('successModal').classList.remove('hidden');
+   
+           if (typeof confetti !== 'undefined') {
+             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+           }
+         } else {
+           showStatus(data.message || 'Yükleme başarısız.', 'error');
+         }
+   
+         setTimeout(() => {
+           progressTrack.classList.add('hidden');
+           progressFill.style.width = '0%';
+           progressPct.textContent = '0%';
+         }, 1000);
+       });
+   
+       xhr.addEventListener('error', () => {
+         showStatus('Bağlantı hatası.', 'error');
+         progressTrack.classList.add('hidden');
+       });
+   
+       xhr.open('POST', '/Sadaka/Upload');
+       xhr.send(formData);
+     } catch {
+       showStatus('Yükleme sırasında bir hata oluştu.', 'error');
+       progressTrack.classList.add('hidden');
+     }
+   }
+   
+   window.doUpload = doUpload;
+   
+   function resetAll() {
+     $('successModal').classList.add('hidden');
+     stopCamera();
+     photoData = null;
+     CHECKBOXES.forEach(id => { if ($(id)) $(id).checked = false; });
+     checkUploadReady();
+   }
+   window.resetAll = resetAll;
+   
+   /* ═══════════════════════════════════════════════════════════════
+      STATS & COUNTERS
+      ═══════════════════════════════════════════════════════════════ */
+   function animateCounter(el, target) {
+     if (!el) return;
+     const start = parseInt(el.textContent) || 0;
+     const startTime = performance.now();
+     function update(now) {
+       const progress = Math.min((now - startTime) / 800, 1);
+       const easeOut = 1 - Math.pow(1 - progress, 3);
+       el.textContent = Math.round(start + (target - start) * easeOut);
+       if (progress < 1) requestAnimationFrame(update);
+       else el.textContent = target;
+     }
+     requestAnimationFrame(update);
+   }
+   
+   function animateCounters() {
+     ['statToday', 'statTotal'].forEach(id => {
+       const el = $(id);
+       if (el) animateCounter(el, parseInt(el.dataset.target) || 0);
+     });
+   }
+   
+   /* ═══════════════════════════════════════════════════════════════
+      SHARE
+      ═══════════════════════════════════════════════════════════════ */
+   function copyShareLink() {
+     const url = window.location.href;
+     const btn = $('btnShare');
+     const orig = btn.innerHTML;
+     navigator.clipboard.writeText(url)
+       .then(() => { btn.innerHTML = '✅ Kopyalandı!'; setTimeout(() => { btn.innerHTML = orig; }, 2200); })
+       .catch(() => { try { prompt('Bu linki kopyalayın:', url); } catch (_) {} });
+   }
+   window.copyShareLink = copyShareLink;
+   
+   /* ═══════════════════════════════════════════════════════════════
+      UTILS
+      ═══════════════════════════════════════════════════════════════ */
+   function showStatus(msg, type = 'info') {
+     const el = $('statusMsg');
+     if (!el) return;
+     el.textContent = msg;
+     el.className = `status-msg ${type}`;
+     el.classList.remove('hidden');
+     if (type === 'success' || type === 'error') setTimeout(() => el.classList.add('hidden'), 4000);
+   }
+   
+   /* ═══════════════════════════════════════════════════════════════
+      INIT
+      ═══════════════════════════════════════════════════════════════ */
+   document.addEventListener('DOMContentLoaded', () => {
+     initAuth();
+     animateCounters();
+     checkUploadReady();
+   });

@@ -3,227 +3,243 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Gülümsemek sadakadır — bir gülümseni paylaş, sadakana ortak et." />
+  <meta name="description" content="Tebessüm sadakadır — bir tebessümü paylaş, sadakana ortak et." />
   <meta name="theme-color" content="#1a4a4a" />
-  <title>@ViewData["Title"] — Gülümsemek Sadakadır</title>
+  <title>@ViewData["Title"] — Tebessüm Etmek Sadakadır</title>
 
-  <!-- Fonts: Cormorant Garamond (display) + DM Sans (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <link rel="stylesheet" href="/css/site.css" asp-append-version="true" />
 
   @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
-  @* ════════════════════════════════════════════════════════════
-     RAMAZAN SÜSLEMELERİ
-     _Layout.cshtml içinde <body> açılış etiketinin HEMEN ALTINA ekle.
-     Örnek: <body>\n  <!-- BURAYA --> \n  @RenderBody()
-     ═══════════════════════════════════════════════════════════ *@
 
-<!-- Üstteki yatay ip şeridi -->
-<div class="ramadan-rope-line" aria-hidden="true"></div>
+  @* ═══════════════════════════════════════════════════════════════
+     RAMAZAN SÜSLEMELERİ — _Layout.cshtml'deki mevcut ramadan-deco
+     bloğunu TAMAMEN bununla değiştir (rope-line dahil)
+     ═══════════════════════════════════════════════════════════════ *@
 
-<div class="ramadan-deco" aria-hidden="true" id="ramadanDeco">
+  <!-- Üstteki yatay ip şeridi -->
+  <div class="ramadan-rope-line" aria-hidden="true"></div>
 
-  <!-- 1. Büyük fener – sol kenar -->
-  <div class="deco-item is-lantern rope-xlong" style="left:3%">
-    <div class="deco-swing">
-      <svg width="44" height="64" viewBox="0 0 44 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#c9a84c"/>
-            <stop offset="40%" stop-color="#e8cc82"/>
-            <stop offset="100%" stop-color="#a07830"/>
-          </linearGradient>
-          <linearGradient id="glowGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#fff0a0" stop-opacity=".5"/>
-            <stop offset="100%" stop-color="#ffa500" stop-opacity=".15"/>
-          </linearGradient>
-        </defs>
-        <rect x="15" y="0" width="14" height="5" rx="2" fill="url(#lg1)"/>
-        <rect x="18" y="4" width="8" height="4" rx="1" fill="url(#lg1)"/>
-        <ellipse cx="22" cy="12" rx="12" ry="4" fill="url(#lg1)"/>
-        <path d="M10 12 Q8 28 10 44 H34 Q36 28 34 12 Z" fill="url(#lg1)" opacity=".25"/>
-        <line x1="22" y1="12" x2="22" y2="44" stroke="#c9a84c" stroke-width="1.2" opacity=".7"/>
-        <line x1="15" y1="12" x2="13" y2="44" stroke="#c9a84c" stroke-width="1.2" opacity=".7"/>
-        <line x1="29" y1="12" x2="31" y2="44" stroke="#c9a84c" stroke-width="1.2" opacity=".7"/>
-        <ellipse cx="22" cy="20" rx="12" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="22" cy="28" rx="13" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="22" cy="36" rx="12" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="22" cy="28" rx="9" ry="13" fill="url(#glowGrad)"/>
-        <ellipse cx="22" cy="44" rx="12" ry="4" fill="url(#lg1)"/>
-        <path d="M16 48 Q22 56 28 48 Z" fill="url(#lg1)"/>
-        <circle cx="22" cy="56" r="3" fill="url(#lg1)"/>
-        <path d="M10 12 Q8 28 10 44" fill="none" stroke="url(#lg1)" stroke-width="2"/>
-        <path d="M34 12 Q36 28 34 44" fill="none" stroke="url(#lg1)" stroke-width="2"/>
-      </svg>
+  <!-- Sarkıtılmış süsleme öğeleri -->
+  <div class="ramadan-deco" aria-hidden="true" id="ramadanDeco">
+
+    <!-- 1. Büyük fener – en sol -->
+    <div class="deco-item is-lantern rope-xlong" style="left:3%">
+      <div class="deco-swing">
+        <svg width="44" height="64" viewBox="0 0 44 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#c9a84c"/>
+              <stop offset="40%" stop-color="#e8cc82"/>
+              <stop offset="100%" stop-color="#a07830"/>
+            </linearGradient>
+            <linearGradient id="glow1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff0a0" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#ffa500" stop-opacity=".12"/>
+            </linearGradient>
+          </defs>
+          <rect x="15" y="0" width="14" height="5" rx="2" fill="url(#lg1)"/>
+          <rect x="18" y="4" width="8" height="4" rx="1" fill="url(#lg1)"/>
+          <ellipse cx="22" cy="12" rx="12" ry="4" fill="url(#lg1)"/>
+          <path d="M10 12 Q8 28 10 44 H34 Q36 28 34 12 Z" fill="url(#lg1)" opacity=".22"/>
+          <line x1="22" y1="12" x2="22" y2="44" stroke="#c9a84c" stroke-width="1.2" opacity=".7"/>
+          <line x1="15" y1="12" x2="13" y2="44" stroke="#c9a84c" stroke-width="1.2" opacity=".7"/>
+          <line x1="29" y1="12" x2="31" y2="44" stroke="#c9a84c" stroke-width="1.2" opacity=".7"/>
+          <ellipse cx="22" cy="20" rx="12" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="22" cy="28" rx="13" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="22" cy="36" rx="12" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="22" cy="28" rx="9" ry="13" fill="url(#glow1)"/>
+          <ellipse cx="22" cy="44" rx="12" ry="4" fill="url(#lg1)"/>
+          <path d="M16 48 Q22 56 28 48 Z" fill="url(#lg1)"/>
+          <circle cx="22" cy="56" r="3" fill="url(#lg1)"/>
+          <path d="M10 12 Q8 28 10 44" fill="none" stroke="url(#lg1)" stroke-width="2"/>
+          <path d="M34 12 Q36 28 34 44" fill="none" stroke="url(#lg1)" stroke-width="2"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <!-- 2. Yıldız – soldan 12% -->
-  <div class="deco-item rope-medium" style="left:12%">
-    <div class="deco-swing">
-      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="19,2 23.5,13.5 36,14 27,22.5 30,35 19,28 8,35 11,22.5 2,14 14.5,13.5" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
-        <polygon points="19,6 22.5,14.5 32,15.2 25,21.5 27.5,31 19,26 10.5,31 13,21.5 6,15.2 15.5,14.5" fill="#c9a84c" opacity=".18"/>
-        <polygon points="19,9 21,15.5 28,16 23,20.5 24.5,28 19,24.5 13.5,28 15,20.5 10,16 17,15.5" fill="#d9be6e" opacity=".55"/>
-        <polygon points="19,9 21,15.5 28,16 23,20.5 24.5,28 19,24.5 13.5,28 15,20.5 10,16 17,15.5" fill="none" stroke="#e8cc82" stroke-width=".8"/>
-      </svg>
+    <!-- 2. Yıldız – soldan %13 -->
+    <div class="deco-item rope-medium" style="left:13%">
+      <div class="deco-swing">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="19,2 23.5,13.5 36,14 27,22.5 30,35 19,28 8,35 11,22.5 2,14 14.5,13.5"
+                   fill="none" stroke="#c9a84c" stroke-width="1.5"/>
+          <polygon points="19,6 22.5,14.5 32,15.2 25,21.5 27.5,31 19,26 10.5,31 13,21.5 6,15.2 15.5,14.5"
+                   fill="#c9a84c" opacity=".18"/>
+          <polygon points="19,9 21,15.5 28,16 23,20.5 24.5,28 19,24.5 13.5,28 15,20.5 10,16 17,15.5"
+                   fill="#d9be6e" opacity=".6"/>
+          <polygon points="19,9 21,15.5 28,16 23,20.5 24.5,28 19,24.5 13.5,28 15,20.5 10,16 17,15.5"
+                   fill="none" stroke="#e8cc82" stroke-width=".8"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <!-- 3. Hilal + Cami – soldan 22% -->
-  <div class="deco-item rope-long" style="left:22%">
-    <div class="deco-swing">
-      <svg width="52" height="58" viewBox="0 0 52 58" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#e8cc82"/>
-            <stop offset="100%" stop-color="#a07830"/>
-          </linearGradient>
-        </defs>
-        <path d="M26 4 C14 4 6 13 6 24 C6 35 14 44 26 44 C20 44 15 38 16 30 C17 21 23 14 32 14 C29 9 26 4 26 4 Z" fill="url(#lg2)"/>
-        <g transform="translate(10,22)" opacity=".8">
-          <rect x="4" y="8" width="10" height="8" fill="#c9a84c"/>
-          <polygon points="9,2 4,8 14,8" fill="#c9a84c"/>
-          <rect x="7" y="3" width="4" height="2" rx="1" fill="#c9a84c"/>
-          <rect x="1" y="5" width="3" height="11" fill="#c9a84c"/>
-          <rect x="14" y="5" width="3" height="11" fill="#c9a84c"/>
-          <polygon points="2.5,2 1,5 4,5" fill="#c9a84c"/>
-          <polygon points="15.5,2 14,5 17,5" fill="#c9a84c"/>
-        </g>
-        <path d="M26 4 C14 4 6 13 6 24 C6 35 14 44 26 44 C20 44 15 38 16 30 C17 21 23 14 32 14 C29 9 26 4 26 4 Z" fill="none" stroke="#e8cc82" stroke-width="1.2" opacity=".6"/>
-        <line x1="6" y1="48" x2="46" y2="48" stroke="#c9a84c" stroke-width="1" opacity=".5"/>
-        <circle cx="26" cy="48" r="2.5" fill="#c9a84c"/>
-        <circle cx="12" cy="48" r="1.5" fill="#c9a84c" opacity=".6"/>
-        <circle cx="40" cy="48" r="1.5" fill="#c9a84c" opacity=".6"/>
-        <polygon points="38,8 39.4,12 44,12 40.3,14.7 41.7,19 38,16.3 34.3,19 35.7,14.7 32,12 36.6,12" fill="#e8cc82" opacity=".9"/>
-      </svg>
+    <!-- 3. Hilal + cami – soldan %23 -->
+    <div class="deco-item rope-long" style="left:23%">
+      <div class="deco-swing">
+        <svg width="52" height="58" viewBox="0 0 52 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#e8cc82"/>
+              <stop offset="100%" stop-color="#a07830"/>
+            </linearGradient>
+          </defs>
+          <path d="M26 4 C14 4 6 13 6 24 C6 35 14 44 26 44 C20 44 15 38 16 30 C17 21 23 14 32 14 C29 9 26 4 26 4 Z"
+                fill="url(#lg2)"/>
+          <g transform="translate(10,22)" opacity=".82">
+            <rect x="4" y="8" width="10" height="8" fill="#c9a84c"/>
+            <polygon points="9,2 4,8 14,8" fill="#c9a84c"/>
+            <rect x="7" y="3" width="4" height="2" rx="1" fill="#c9a84c"/>
+            <rect x="1" y="5" width="3" height="11" fill="#c9a84c"/>
+            <rect x="14" y="5" width="3" height="11" fill="#c9a84c"/>
+            <polygon points="2.5,2 1,5 4,5" fill="#c9a84c"/>
+            <polygon points="15.5,2 14,5 17,5" fill="#c9a84c"/>
+          </g>
+          <path d="M26 4 C14 4 6 13 6 24 C6 35 14 44 26 44 C20 44 15 38 16 30 C17 21 23 14 32 14 C29 9 26 4 26 4 Z"
+                fill="none" stroke="#e8cc82" stroke-width="1.2" opacity=".55"/>
+          <line x1="6" y1="48" x2="46" y2="48" stroke="#c9a84c" stroke-width="1" opacity=".45"/>
+          <circle cx="26" cy="48" r="2.5" fill="#c9a84c"/>
+          <circle cx="12" cy="48" r="1.5" fill="#c9a84c" opacity=".55"/>
+          <circle cx="40" cy="48" r="1.5" fill="#c9a84c" opacity=".55"/>
+          <polygon points="38,8 39.4,12 44,12 40.3,14.7 41.7,19 38,16.3 34.3,19 35.7,14.7 32,12 36.6,12"
+                   fill="#e8cc82" opacity=".9"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <!-- 4. Küçük fener – soldan 33% -->
-  <div class="deco-item is-lantern rope-short" style="left:33%">
-    <div class="deco-swing">
-      <svg width="32" height="48" viewBox="0 0 32 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="lg3" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#c9a84c"/>
-            <stop offset="50%" stop-color="#e8cc82"/>
-            <stop offset="100%" stop-color="#a07830"/>
-          </linearGradient>
-        </defs>
-        <rect x="11" y="0" width="10" height="4" rx="1.5" fill="url(#lg3)"/>
-        <rect x="13" y="3" width="6" height="3" rx="1" fill="url(#lg3)"/>
-        <ellipse cx="16" cy="10" rx="9" ry="3.5" fill="url(#lg3)"/>
-        <path d="M7 10 Q6 22 7 33 H25 Q26 22 25 10 Z" fill="url(#lg3)" opacity=".2"/>
-        <ellipse cx="16" cy="17" rx="9" ry="2.5" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="16" cy="23" rx="10" ry="2.5" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="16" cy="29" rx="9" ry="2.5" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <line x1="16" y1="10" x2="16" y2="33" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
-        <line x1="10" y1="10" x2="9" y2="33" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
-        <line x1="22" y1="10" x2="23" y2="33" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
-        <ellipse cx="16" cy="33" rx="9" ry="3.5" fill="url(#lg3)"/>
-        <path d="M11 37 Q16 43 21 37 Z" fill="url(#lg3)"/>
-        <circle cx="16" cy="43" r="2" fill="url(#lg3)"/>
-        <path d="M7 10 Q6 22 7 33" fill="none" stroke="url(#lg3)" stroke-width="1.5"/>
-        <path d="M25 10 Q26 22 25 33" fill="none" stroke="url(#lg3)" stroke-width="1.5"/>
-      </svg>
+    <!-- 4. Küçük fener – soldan %34 -->
+    <div class="deco-item is-lantern rope-short" style="left:34%">
+      <div class="deco-swing">
+        <svg width="32" height="48" viewBox="0 0 32 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg3" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#c9a84c"/>
+              <stop offset="50%" stop-color="#e8cc82"/>
+              <stop offset="100%" stop-color="#a07830"/>
+            </linearGradient>
+          </defs>
+          <rect x="11" y="0" width="10" height="4" rx="1.5" fill="url(#lg3)"/>
+          <rect x="13" y="3" width="6" height="3" rx="1" fill="url(#lg3)"/>
+          <ellipse cx="16" cy="10" rx="9" ry="3.5" fill="url(#lg3)"/>
+          <path d="M7 10 Q6 22 7 33 H25 Q26 22 25 10 Z" fill="url(#lg3)" opacity=".2"/>
+          <ellipse cx="16" cy="17" rx="9" ry="2.5" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="16" cy="23" rx="10" ry="2.5" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="16" cy="29" rx="9" ry="2.5" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <line x1="16" y1="10" x2="16" y2="33" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
+          <line x1="10" y1="10" x2="9"  y2="33" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
+          <line x1="22" y1="10" x2="23" y2="33" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
+          <ellipse cx="16" cy="33" rx="9" ry="3.5" fill="url(#lg3)"/>
+          <path d="M11 37 Q16 43 21 37 Z" fill="url(#lg3)"/>
+          <circle cx="16" cy="43" r="2" fill="url(#lg3)"/>
+          <path d="M7 10 Q6 22 7 33"  fill="none" stroke="url(#lg3)" stroke-width="1.5"/>
+          <path d="M25 10 Q26 22 25 33" fill="none" stroke="url(#lg3)" stroke-width="1.5"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <!-- 5. 8 köşeli yıldız – ortada -->
-  <div class="deco-item rope-medium" style="left:50%; margin-left:-21px">
-    <div class="deco-swing">
-      <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="21" cy="21" r="19" fill="none" stroke="#c9a84c" stroke-width="1" opacity=".4"/>
-        <circle cx="21" cy="21" r="15" fill="none" stroke="#c9a84c" stroke-width=".6" opacity=".25"/>
-        <path d="M21 3 L23.5 15 L35 10 L26.5 19.5 L39 21 L26.5 22.5 L35 32 L23.5 27 L21 39 L18.5 27 L7 32 L15.5 22.5 L3 21 L15.5 19.5 L7 10 L18.5 15 Z" fill="#c9a84c" opacity=".7"/>
-        <path d="M21 3 L23.5 15 L35 10 L26.5 19.5 L39 21 L26.5 22.5 L35 32 L23.5 27 L21 39 L18.5 27 L7 32 L15.5 22.5 L3 21 L15.5 19.5 L7 10 L18.5 15 Z" fill="none" stroke="#e8cc82" stroke-width="1"/>
-        <circle cx="21" cy="21" r="3" fill="#e8cc82"/>
-      </svg>
+    <!-- 5. 8 köşeli yıldız – ortada -->
+    <div class="deco-item rope-medium" style="left:50%; margin-left:-21px">
+      <div class="deco-swing">
+        <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="21" cy="21" r="19" fill="none" stroke="#c9a84c" stroke-width="1" opacity=".38"/>
+          <circle cx="21" cy="21" r="15" fill="none" stroke="#c9a84c" stroke-width=".6" opacity=".22"/>
+          <path d="M21 3 L23.5 15 L35 10 L26.5 19.5 L39 21 L26.5 22.5 L35 32 L23.5 27 L21 39
+                   L18.5 27 L7 32 L15.5 22.5 L3 21 L15.5 19.5 L7 10 L18.5 15 Z"
+                fill="#c9a84c" opacity=".7"/>
+          <path d="M21 3 L23.5 15 L35 10 L26.5 19.5 L39 21 L26.5 22.5 L35 32 L23.5 27 L21 39
+                   L18.5 27 L7 32 L15.5 22.5 L3 21 L15.5 19.5 L7 10 L18.5 15 Z"
+                fill="none" stroke="#e8cc82" stroke-width="1"/>
+          <circle cx="21" cy="21" r="3" fill="#e8cc82"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <!-- 6. Büyük hilal (sağa bakan) – sağdan 22% -->
-  <div class="deco-item rope-xlong" style="right:22%">
-    <div class="deco-swing">
-      <svg width="56" height="62" viewBox="0 0 56 62" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="lg4" x1="1" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#e8cc82"/>
-            <stop offset="100%" stop-color="#a07830"/>
-          </linearGradient>
-        </defs>
-        <path d="M28 4 C40 4 48 13 48 24 C48 35 40 46 28 46 C34 46 39 38 38 30 C37 21 31 14 22 14 C25 9 28 4 28 4 Z" fill="url(#lg4)"/>
-        <path d="M28 4 C40 4 48 13 48 24 C48 35 40 46 28 46 C34 46 39 38 38 30 C37 21 31 14 22 14 C25 9 28 4 28 4 Z" fill="none" stroke="#e8cc82" stroke-width="1.2" opacity=".6"/>
-        <g transform="translate(24,20)" opacity=".85">
-          <rect x="2" y="6" width="8" height="7" fill="#c9a84c"/>
-          <polygon points="6,1 2,6 10,6" fill="#c9a84c"/>
-          <rect x="0" y="4" width="2" height="9" fill="#c9a84c"/>
-          <rect x="10" y="4" width="2" height="9" fill="#c9a84c"/>
-          <polygon points="1,2 0,4 2,4" fill="#c9a84c"/>
-          <polygon points="11,2 10,4 12,4" fill="#c9a84c"/>
-        </g>
-        <line x1="8" y1="50" x2="48" y2="50" stroke="#c9a84c" stroke-width="1" opacity=".5"/>
-        <circle cx="28" cy="50" r="3" fill="#c9a84c"/>
-        <circle cx="14" cy="50" r="2" fill="#c9a84c" opacity=".6"/>
-        <circle cx="42" cy="50" r="2" fill="#c9a84c" opacity=".6"/>
-        <polygon points="14,8 15,11.5 19,11.5 16,13.5 17,17 14,15 11,17 12,13.5 9,11.5 13,11.5" fill="#e8cc82" opacity=".85"/>
-      </svg>
+    <!-- 6. Büyük hilal (sağa bakan) – sağdan %23 -->
+    <div class="deco-item rope-xlong" style="right:23%">
+      <div class="deco-swing">
+        <svg width="56" height="62" viewBox="0 0 56 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg4" x1="1" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e8cc82"/>
+              <stop offset="100%" stop-color="#a07830"/>
+            </linearGradient>
+          </defs>
+          <path d="M28 4 C40 4 48 13 48 24 C48 35 40 46 28 46 C34 46 39 38 38 30 C37 21 31 14 22 14 C25 9 28 4 28 4 Z"
+                fill="url(#lg4)"/>
+          <path d="M28 4 C40 4 48 13 48 24 C48 35 40 46 28 46 C34 46 39 38 38 30 C37 21 31 14 22 14 C25 9 28 4 28 4 Z"
+                fill="none" stroke="#e8cc82" stroke-width="1.2" opacity=".55"/>
+          <g transform="translate(24,20)" opacity=".85">
+            <rect x="2" y="6" width="8" height="7" fill="#c9a84c"/>
+            <polygon points="6,1 2,6 10,6" fill="#c9a84c"/>
+            <rect x="0" y="4" width="2" height="9" fill="#c9a84c"/>
+            <rect x="10" y="4" width="2" height="9" fill="#c9a84c"/>
+            <polygon points="1,2 0,4 2,4" fill="#c9a84c"/>
+            <polygon points="11,2 10,4 12,4" fill="#c9a84c"/>
+          </g>
+          <line x1="8"  y1="50" x2="48" y2="50" stroke="#c9a84c" stroke-width="1" opacity=".45"/>
+          <circle cx="28" cy="50" r="3" fill="#c9a84c"/>
+          <circle cx="14" cy="50" r="2" fill="#c9a84c" opacity=".55"/>
+          <circle cx="42" cy="50" r="2" fill="#c9a84c" opacity=".55"/>
+          <polygon points="14,8 15,11.5 19,11.5 16,13.5 17,17 14,15 11,17 12,13.5 9,11.5 13,11.5"
+                   fill="#e8cc82" opacity=".88"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <!-- 7. Küçük fener – sağdan 12% -->
-  <div class="deco-item is-lantern rope-long" style="right:12%">
-    <div class="deco-swing">
-      <svg width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="lg5" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#c9a84c"/>
-            <stop offset="50%" stop-color="#e8cc82"/>
-            <stop offset="100%" stop-color="#a07830"/>
-          </linearGradient>
-          <linearGradient id="glow5" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#fff0a0" stop-opacity=".4"/>
-            <stop offset="100%" stop-color="#ffa500" stop-opacity=".1"/>
-          </linearGradient>
-        </defs>
-        <rect x="12" y="0" width="12" height="5" rx="2" fill="url(#lg5)"/>
-        <rect x="15" y="4" width="6" height="4" rx="1" fill="url(#lg5)"/>
-        <ellipse cx="18" cy="12" rx="11" ry="4" fill="url(#lg5)"/>
-        <path d="M7 12 Q5 26 7 38 H29 Q31 26 29 12 Z" fill="url(#lg5)" opacity=".2"/>
-        <ellipse cx="18" cy="22" rx="11" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="18" cy="29" rx="12" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="18" cy="36" rx="11" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
-        <ellipse cx="18" cy="20" rx="8" ry="14" fill="url(#glow5)"/>
-        <line x1="18" y1="12" x2="18" y2="38" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
-        <line x1="11" y1="12" x2="10" y2="38" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
-        <line x1="25" y1="12" x2="26" y2="38" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
-        <ellipse cx="18" cy="38" rx="11" ry="4" fill="url(#lg5)"/>
-        <path d="M12 42 Q18 50 24 42 Z" fill="url(#lg5)"/>
-        <circle cx="18" cy="48" r="2.5" fill="url(#lg5)"/>
-        <path d="M7 12 Q5 26 7 38" fill="none" stroke="url(#lg5)" stroke-width="1.5"/>
-        <path d="M29 12 Q31 26 29 38" fill="none" stroke="url(#lg5)" stroke-width="1.5"/>
-      </svg>
+    <!-- 7. Küçük fener – sağdan %13 -->
+    <div class="deco-item is-lantern rope-long" style="right:13%">
+      <div class="deco-swing">
+        <svg width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lg5" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#c9a84c"/>
+              <stop offset="50%" stop-color="#e8cc82"/>
+              <stop offset="100%" stop-color="#a07830"/>
+            </linearGradient>
+            <linearGradient id="glow5" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff0a0" stop-opacity=".4"/>
+              <stop offset="100%" stop-color="#ffa500" stop-opacity=".1"/>
+            </linearGradient>
+          </defs>
+          <rect x="12" y="0" width="12" height="5" rx="2" fill="url(#lg5)"/>
+          <rect x="15" y="4" width="6"  height="4" rx="1" fill="url(#lg5)"/>
+          <ellipse cx="18" cy="12" rx="11" ry="4" fill="url(#lg5)"/>
+          <path d="M7 12 Q5 26 7 38 H29 Q31 26 29 12 Z" fill="url(#lg5)" opacity=".2"/>
+          <ellipse cx="18" cy="22" rx="11" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="18" cy="29" rx="12" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="18" cy="36" rx="11" ry="3" fill="none" stroke="#c9a84c" stroke-width="1"/>
+          <ellipse cx="18" cy="20" rx="8" ry="14" fill="url(#glow5)"/>
+          <line x1="18" y1="12" x2="18" y2="38" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
+          <line x1="11" y1="12" x2="10" y2="38" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
+          <line x1="25" y1="12" x2="26" y2="38" stroke="#c9a84c" stroke-width="1" opacity=".6"/>
+          <ellipse cx="18" cy="38" rx="11" ry="4" fill="url(#lg5)"/>
+          <path d="M12 42 Q18 50 24 42 Z" fill="url(#lg5)"/>
+          <circle cx="18" cy="48" r="2.5" fill="url(#lg5)"/>
+          <path d="M7 12 Q5 26 7 38"   fill="none" stroke="url(#lg5)" stroke-width="1.5"/>
+          <path d="M29 12 Q31 26 29 38" fill="none" stroke="url(#lg5)" stroke-width="1.5"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <!-- 8. Yıldız – sağdan 4% -->
-  <div class="deco-item rope-short" style="right:4%">
-    <div class="deco-swing">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="18,2 21,12 32,12 23.5,18.5 26.5,29 18,23 9.5,29 12.5,18.5 4,12 15,12" fill="#c9a84c" opacity=".75"/>
-        <polygon points="18,2 21,12 32,12 23.5,18.5 26.5,29 18,23 9.5,29 12.5,18.5 4,12 15,12" fill="none" stroke="#e8cc82" stroke-width="1.2"/>
-        <circle cx="18" cy="17" r="4" fill="#e8cc82" opacity=".4"/>
-      </svg>
+    <!-- 8. Yıldız – en sağ -->
+    <div class="deco-item rope-short" style="right:3%">
+      <div class="deco-swing">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="18,2 21,12 32,12 23.5,18.5 26.5,29 18,23 9.5,29 12.5,18.5 4,12 15,12"
+                   fill="#c9a84c" opacity=".75"/>
+          <polygon points="18,2 21,12 32,12 23.5,18.5 26.5,29 18,23 9.5,29 12.5,18.5 4,12 15,12"
+                   fill="none" stroke="#e8cc82" stroke-width="1.2"/>
+          <circle cx="18" cy="17" r="4" fill="#e8cc82" opacity=".4"/>
+        </svg>
+      </div>
     </div>
-  </div>
 
-</div>
+  </div>
 
   @RenderBody()
 
@@ -231,18 +247,19 @@
     <div class="footer-inner">
       <div class="footer-brand">
         <span class="footer-ornament">✦</span>
-        <span class="footer-name">Gülümsemek Sadakadır</span>
+        <span class="footer-name">Tebessüm Etmek Sadakadır</span>
         <span class="footer-ornament">✦</span>
       </div>
       <p class="footer-hadith">
-        "Kardeşinin yüzüne gülümsemen bile sana sadaka olarak yazılır."
+        "Kardeşinin yüzüne tebessüm etmen bile sana sadaka olarak yazılır."
         <em>— Tirmizî, Birr 36</em>
       </p>
       <p class="footer-copy">&copy; @DateTime.Now.Year — Her hakkı saklıdır</p>
     </div>
   </footer>
 
-  <script src="~/js/site.js" asp-append-version="true"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="/js/site.js" asp-append-version="true"></script>
   @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

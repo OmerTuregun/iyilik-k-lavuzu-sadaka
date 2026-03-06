@@ -1,24 +1,49 @@
-version: "3.9"
-
 services:
+
   web:
     build: .
     container_name: gulumsemek-web
     ports:
-      - "${APP_PORT}:8080"
-    volumes:
-      # wwwroot'u container içindeki uygulama wwwroot'una bağla; CSS/JS değişiklikleri için yeniden build gerekmesin
-      - ./wwwroot:/app/wwwroot
+      - "127.0.0.1:${APP_PORT}:8080"
     depends_on:
-      - sadaka-minio
+      sadaka-mysql:
+        condition: service_healthy
+      sadaka-minio:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sadaka-mysql;Database=${MYSQL_DATABASE};User=root;Password=${MYSQL_ROOT_PASSWORD}
+      - Minio__Endpoint=${MINIO_ENDPOINT}
+      - Minio__AccessKey=${MINIO_ROOT_USER}
+      - Minio__SecretKey=${MINIO_ROOT_PASSWORD}
+      - Minio__Bucket=${MINIO_BUCKET_NAME}
+    volumes:
+      - ./wwwroot:/app/wwwroot
+      - ./Views:/app/Views
     networks:
       - sadaka-net
+    restart: unless-stopped
+
+  sadaka-mysql:
+    image: mysql:8.0
+    container_name: sadaka-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - sadaka-net
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
 
   sadaka-minio:
     image: minio/minio:latest
@@ -34,10 +59,12 @@ services:
       - minio-data:/data
     networks:
       - sadaka-net
+    restart: unless-stopped
 
 networks:
   sadaka-net:
     driver: bridge
 
 volumes:
+  mysql-data:
   minio-data:

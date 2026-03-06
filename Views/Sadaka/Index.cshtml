@@ -1,20 +1,116 @@
 @{
-    ViewData["Title"] = "Gülümseni Paylaş";
+    ViewData["Title"] = "Tebessümünü Paylaş";
     int todayCount = ViewBag.TodayCount ?? 0;
     int totalCount = ViewBag.TotalCount ?? 0;
 }
 @section Head {
-    <title>@ViewData["Title"] — Gülümsemek Sadakadır</title>
+    <title>@ViewData["Title"] — Tebessüm Sadakadır</title>
 }
 
-<div class="page-grain"></div>
+<!-- ════════════════════════════════ AUTH MODAL ═══════════════════════════════ -->
+<div class="auth-modal-overlay hidden" id="authModal">
+  <div class="auth-modal-card">
+    <div class="auth-modal-header">
+      <h2 class="auth-modal-title">Tebessümünü Kime Yazalım?</h2>
+      <p class="auth-modal-subtitle">Puanların sana gelsin diye, küçük bir not bırak.</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="register" id="tabRegister">Kayıt Ol</button>
+      <button class="auth-tab" data-tab="login" id="tabLogin">Giriş Yap</button>
+    </div>
+    <form class="auth-form active" id="formRegister">
+      <div class="auth-form-group">
+        <label for="regDisplayName">İsim / Kullanıcı Adı</label>
+        <input type="text" id="regDisplayName" name="displayName" required autocomplete="username" />
+      </div>
+      <div class="auth-form-group">
+        <label for="regPin">4 Haneli PIN</label>
+        <input type="text" id="regPin" name="pin" pattern="[0-9]{4}" maxlength="4" required autocomplete="off" placeholder="0000" />
+      </div>
+      <button type="submit" class="auth-submit-btn">Kayıt Ol</button>
+      <div class="auth-status" id="registerStatus"></div>
+    </form>
+    <form class="auth-form hidden" id="formLogin">
+      <div class="auth-form-group">
+        <label for="loginDisplayName">İsim / Kullanıcı Adı</label>
+        <input type="text" id="loginDisplayName" name="displayName" required autocomplete="username" />
+      </div>
+      <div class="auth-form-group">
+        <label for="loginPin">4 Haneli PIN</label>
+        <input type="text" id="loginPin" name="pin" pattern="[0-9]{4}" maxlength="4" required autocomplete="off" placeholder="0000" />
+      </div>
+      <button type="submit" class="auth-submit-btn">Giriş Yap</button>
+      <div class="auth-status" id="loginStatus"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ GÜNLÜK LİMİT MODAL ══════════════════════ -->
+<div class="modal-backdrop hidden" id="limitModal" role="dialog" aria-modal="true">
+  <div class="modal-card limit-modal-card">
+    <div class="modal-icon-wrap">
+      <div class="modal-icon">🌙</div>
+      <div class="modal-icon-ring" aria-hidden="true"></div>
+    </div>
+    <h2 class="modal-title" style="font-size:22px;">Bugünlük Tebessümler Tamam!</h2>
+    <p class="modal-body" style="font-size:15px; line-height:1.7;">
+      İbadetin az ama sürekli yapılanı makbuldür,<br>
+      yarın tekrar bekleriz 👋😄
+    </p>
+    <div class="limit-streak-info" id="limitStreakInfo" style="display:none;">
+      <span class="limit-streak-badge" id="limitStreakBadge">🔥 3 Günlük Seri!</span>
+    </div>
+    <button class="btn btn-primary btn-wide" onclick="closeLimitModal()" style="margin-top:8px;">
+      Tamam, Yarın Görüşürüz ✨
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ BEKLEME MODAL ═══════════════════════════ -->
+<div class="modal-backdrop hidden" id="waitModal" role="dialog" aria-modal="true">
+  <div class="modal-card" style="text-align:center;">
+    <div class="modal-icon-wrap">
+      <div class="modal-icon">⏳</div>
+      <div class="modal-icon-ring" aria-hidden="true"></div>
+    </div>
+    <h2 class="modal-title" style="font-size:22px;">Biraz Daha Bekle</h2>
+    <p class="modal-body" style="font-size:14px; line-height:1.7; margin-bottom:16px;">
+      Yüklemeler arasında en az <strong>1 saat</strong> geçmelidir.<br>
+      Bir sonraki tebessümün için kalan süre:
+    </p>
+
+    <!-- Geri sayım -->
+    <div class="wait-countdown" id="waitCountdown">
+      <div class="wait-time-box">
+        <span class="wait-time-num" id="waitHours">00</span>
+        <span class="wait-time-label">saat</span>
+      </div>
+      <span class="wait-time-sep">:</span>
+      <div class="wait-time-box">
+        <span class="wait-time-num" id="waitMinutes">00</span>
+        <span class="wait-time-label">dakika</span>
+      </div>
+      <span class="wait-time-sep">:</span>
+      <div class="wait-time-box">
+        <span class="wait-time-num" id="waitSeconds">00</span>
+        <span class="wait-time-label">saniye</span>
+      </div>
+    </div>
+
+    <p style="font-size:12px; color:var(--petrol-200); margin:12px 0 20px; opacity:.7;">
+      Sabır da bir ibadettir 🌿
+    </p>
+    <button class="btn btn-primary btn-wide" onclick="closeWaitModal()">
+      Tamam, Bekleyeceğim
+    </button>
+  </div>
+</div>
 
 <!-- ════════════════════════════════ HERO HEADER ═══════════════════════════════ -->
 <header class="site-header">
   <div class="header-bg-lines" aria-hidden="true">
     <span></span><span></span><span></span><span></span>
   </div>
-
   <div class="header-inner">
     <div class="header-left">
       <div class="header-eyebrow">
@@ -23,15 +119,14 @@
         <span class="eyebrow-dot"></span>
       </div>
       <h1 class="site-title">
-        Gülümsemek<br />
+        Tebessüm Etmek<br />
         <em>Sadakadır</em>
       </h1>
       <p class="site-subtitle">Bir fotoğraf çek, bir sadaka bırak.</p>
     </div>
-
     <div class="header-right">
       <blockquote class="hero-hadith">
-        <p>Kardeşinin yüzüne gülümsemen bile sana sadaka olarak yazılır.</p>
+        <p>Kardeşinin yüzüne tebessüm etmen bile sana sadaka olarak yazılır.</p>
         <cite>— Tirmizî, Birr 36</cite>
       </blockquote>
     </div>
@@ -41,19 +136,27 @@
   <div class="stat-bar">
     <div class="stat-bar-inner">
       <div class="stat-item">
-        <div class="stat-icon">📷</div>
-        <div class="stat-body">
-          <span class="stat-num" data-target="@todayCount" id="statToday">@todayCount</span>
-          <span class="stat-label">Bugün Yüklenen</span>
+        <div class="stat-top">
+          <span class="stat-icon">📷</span>
+          <span class="stat-num" id="statToday" data-target="@todayCount">@todayCount</span>
         </div>
+        <span class="stat-label">BUGÜN YÜKLENEN TEBESSÜM</span>
       </div>
       <div class="stat-divider" aria-hidden="true"></div>
       <div class="stat-item">
-        <div class="stat-icon">😊</div>
-        <div class="stat-body">
-          <span class="stat-num" data-target="@totalCount" id="statTotal">@totalCount</span>
-          <span class="stat-label">Toplam Gülümseme</span>
+        <div class="stat-top">
+          <span class="stat-icon">😊</span>
+          <span class="stat-num" id="statTotal" data-target="@totalCount">@totalCount</span>
         </div>
+        <span class="stat-label">TOPLAM TEBESSÜM</span>
+      </div>
+      <div class="stat-divider" aria-hidden="true"></div>
+      <div class="stat-item" id="statPointsItem">
+        <div class="stat-top">
+          <span class="stat-icon">⭐</span>
+          <span class="stat-num" id="statPoints">—</span>
+        </div>
+        <span class="stat-label">SADAKA PUANIM</span>
       </div>
     </div>
   </div>
@@ -63,21 +166,17 @@
 <main class="site-main">
   <div class="main-grid">
 
-    <!-- ── LEFT: Camera Column ── -->
     <section class="camera-col" aria-label="Kamera">
       <div class="col-eyebrow">
         <span class="eyebrow-line"></span>
-        Gülümsemeni Paylaş
+        Tebessümünü Paylaş
         <span class="eyebrow-line"></span>
       </div>
 
-      <!-- Camera Frame -->
       <div class="camera-frame" id="cameraFrame">
-        <video id="videoEl" autoplay muted playsinline aria-label="Kamera görüntüsü"></video>
+        <video id="videoEl" autoplay muted playsinline></video>
         <canvas id="canvasEl" aria-hidden="true"></canvas>
-
-        <!-- Idle placeholder -->
-        <div class="camera-placeholder" id="cameraPlaceholder" aria-hidden="true">
+        <div class="camera-placeholder" id="cameraPlaceholder">
           <div class="placeholder-inner">
             <div class="placeholder-ring">
               <div class="placeholder-icon">📷</div>
@@ -85,30 +184,21 @@
             <p>Kamera bekleniyor…</p>
           </div>
         </div>
-
-        <!-- Corner guides -->
-        <span class="corner-guide tl" aria-hidden="true"></span>
-        <span class="corner-guide tr" aria-hidden="true"></span>
-        <span class="corner-guide bl" aria-hidden="true"></span>
-        <span class="corner-guide br" aria-hidden="true"></span>
-
-        <!-- Countdown overlay -->
+        <span class="corner-guide tl"></span>
+        <span class="corner-guide tr"></span>
+        <span class="corner-guide bl"></span>
+        <span class="corner-guide br"></span>
         <div class="countdown-overlay" id="countdownOverlay" role="timer" aria-live="assertive">
           <div class="countdown-ring" id="countdownRing">
             <span class="countdown-num" id="countdownNum">3</span>
           </div>
         </div>
-
-        <!-- Flash -->
         <div class="flash-overlay" id="flashOverlay" aria-hidden="true"></div>
-
-        <!-- Live indicator -->
-        <div class="live-badge" id="liveBadge" aria-label="Canlı kamera">
+        <div class="live-badge" id="liveBadge">
           <span class="live-dot"></span> CANLI
         </div>
       </div>
 
-      <!-- Controls -->
       <div class="camera-controls" id="ctrlStart">
         <button class="btn btn-primary btn-wide" id="btnStart" onclick="startCamera()">
           <span class="btn-icon">📷</span>
@@ -121,43 +211,50 @@
           <span class="btn-icon">⏱</span>
           <span>3 Saniye Sonra Çek</span>
         </button>
-        <button class="btn btn-ghost" onclick="shootNow()" title="Hemen çek" aria-label="Hemen çek">
-          <span>📸</span>
-        </button>
-        <button class="btn btn-danger" onclick="stopCamera()" title="Kamerayı kapat" aria-label="Kamerayı kapat">
-          <span>✕</span>
-        </button>
+        <button class="btn btn-ghost" onclick="shootNow()" title="Hemen çek"><span>📸</span></button>
+        <button class="btn btn-ghost" onclick="toggleCameraFacing()" title="Ön / Arka Kamera Değiştir"><span>🔄</span></button>
+        <button class="btn btn-danger" onclick="stopCamera()" title="Kamerayı kapat"><span>✕</span></button>
       </div>
 
-      <!-- Photo Preview -->
       <div class="photo-preview hidden" id="photoPreview">
         <div class="preview-header">
           <span class="preview-label">ÖNİZLEME</span>
-          <button class="btn btn-ghost btn-sm" onclick="retake()">
-            ↺ Yeniden Çek
-          </button>
+          <button class="btn btn-ghost btn-sm" onclick="retake()">↺ Yeniden Çek</button>
         </div>
         <div class="preview-img-wrap">
           <img id="previewImg" src="" alt="Çekilen fotoğrafın önizlemesi" />
-          <div class="preview-shimmer"></div>
         </div>
       </div>
 
-      <!-- Inline status -->
       <div class="status-msg hidden" id="statusMsg" role="alert" aria-live="polite"></div>
     </section>
 
-    <!-- ── RIGHT: Action Panel ── -->
     <aside class="action-col" aria-label="Yükleme paneli">
 
-      <!-- ① Onay Kartı -->
+      <div class="panel-card streak-card hidden" id="streakCard">
+        <div class="streak-card-inner">
+          <div class="streak-info">
+            <span class="streak-fire" id="streakFire">🔥</span>
+            <div>
+              <div class="streak-num" id="streakNum">0</div>
+              <div class="streak-label">Günlük Seri</div>
+            </div>
+          </div>
+          <div class="streak-divider"></div>
+          <div class="points-info">
+            <div class="points-num" id="pointsNum">0</div>
+            <div class="points-label">Sadaka Puanı</div>
+          </div>
+        </div>
+        <div class="streak-multiplier" id="streakMultiplier"></div>
+      </div>
+
       <div class="panel-card consent-card">
         <div class="card-header">
           <div class="card-icon-wrap">📋</div>
           <h2 class="card-title">Onay &amp; Gizlilik</h2>
         </div>
         <div class="card-body">
-
           <label class="consent-row" for="consentStorage">
             <div class="checkbox-wrap">
               <input type="checkbox" id="consentStorage" class="consent-check" />
@@ -171,63 +268,39 @@
               Fotoğrafımın <strong>projeye ait sunucularda</strong> güvenli biçimde depolanmasına izin veriyorum.
             </span>
           </label>
-
           <div class="consent-row info-only">
             <div class="checkbox-wrap checkbox-empty" aria-hidden="true"></div>
             <span class="consent-text">
-              İyilik Kılavuzu Programı hakkında detaylı bilgi için
-              <a class="consent-link"
-                 href="https://www.kocaeli.bel.tr/haber/iyilik-kilavuzu-kocaeline-yepyeni-bir-boyut-kazandiracak-47403.html"
-                 target="_blank" rel="noopener noreferrer">
-                 tıklayınız
-              </a>.
+              <p class="consent-link-row">İyilik Kılavuzu Programı hakkında detaylı bilgi için
+                <a class="consent-link"
+                   href="https://www.kocaeli.bel.tr/haber/iyilik-kilavuzu-kocaeline-yepyeni-bir-boyut-kazandiracak-47403.html"
+                   target="_blank" rel="noopener noreferrer">tıklayınız</a>.
+              </p>
             </span>
           </div>
-
         </div>
       </div>
 
-      <!-- ② Upload -->
       <div class="panel-card upload-card">
         <button class="btn-upload" id="btnUpload" disabled onclick="doUpload()" aria-disabled="true">
           <span class="upload-icon">☁️</span>
-          <span class="upload-label">Gülümsemeni Yükle</span>
+          <span class="upload-label">Tebessümünü Yükle</span>
           <span class="upload-arrow">→</span>
         </button>
-
         <div class="progress-track hidden" id="progressTrack">
           <div class="progress-fill" id="progressFill"></div>
           <span class="progress-pct" id="progressPct">0%</span>
         </div>
-
         <p class="upload-note" id="uploadNote">
           Fotoğraf çekip onayı işaretledikten sonra aktif olur
         </p>
       </div>
 
-      @* <!-- ③ Gallery -->
-      <div class="panel-card gallery-card">
-        <div class="card-header">
-          <div class="card-icon-wrap">🖼️</div>
-          <h2 class="card-title">Son Gülümsemeler</h2>
-          <span class="card-badge">BULANIK</span>
-        </div>
-        <div class="gallery-grid" id="galleryGrid">
-          <!-- JS tarafından doldurulur -->
-        </div>
-        <p class="gallery-hint">Üzerine gel → netleşir</p>
-      </div> *@
-
-      <!-- ④ Share -->
-      <div class="panel-card share-card">
-        <p class="share-quote">
-          "Sen de bir <em>sadaka</em> bırak."
-        </p>
+      <div class="panel-card" id="shareCard">
+        <p class="share-quote">"Sen de bir <em>sadaka</em> bırak."</p>
         <p class="share-sub">Bu sayfayı arkadaşlarına ulaştır, iyiliğe ortak ol.</p>
         <div class="share-buttons">
-          <button class="btn-share" id="btnShare" onclick="copyShareLink()">
-            🔗 Linki Kopyala
-          </button>
+          <button class="btn-share" id="btnShare" onclick="copyShareLink()">🔗 Linki Kopyala</button>
         </div>
       </div>
 
@@ -236,16 +309,25 @@
 </main>
 
 <!-- ════════════════════════════════ SUCCESS MODAL ═════════════════════════════ -->
-<div class="modal-backdrop hidden" id="successModal" role="dialog" aria-modal="true" aria-label="Başarılı yükleme">
+<div class="modal-backdrop hidden" id="successModal" role="dialog" aria-modal="true">
   <div class="modal-card">
     <div class="modal-icon-wrap">
       <div class="modal-icon">😊</div>
       <div class="modal-icon-ring" aria-hidden="true"></div>
     </div>
-    <h2 class="modal-title">Gülümsemen Yüklendi!</h2>
-    <p class="modal-body">
-      Sadakan kabul olsun. Bir gülümseme bazen birileri için en büyük hediyedir.
-    </p>
+    <h2 class="modal-title">Tebessümün Yüklendi!</h2>
+    <p class="modal-body">Sadakan kabul olsun. Bir tebessüm bazen birileri için en büyük hediyedir.</p>
+
+    <div class="modal-points-earned hidden" id="modalPointsEarned">
+      <span class="modal-points-icon">⭐</span>
+      <span id="modalPointsEarnedNum">+1</span>
+      <span class="modal-points-earned-label">sadaka puanı kazandın!</span>
+    </div>
+
+    <div class="modal-streak hidden" id="modalStreak">
+      <span id="modalStreakText">🔥 2 Günlük Seri!</span>
+    </div>
+
     <div class="modal-stats">
       <div class="modal-stat">
         <span class="modal-stat-num" id="modalTodayNum">—</span>
@@ -256,13 +338,18 @@
         <span class="modal-stat-num" id="modalTotalNum">—</span>
         <span class="modal-stat-label">Toplam</span>
       </div>
+      <div class="modal-stat-div" aria-hidden="true"></div>
+      <div class="modal-stat">
+        <span class="modal-stat-num" id="modalPointsNum">—</span>
+        <span class="modal-stat-label">Puanım</span>
+      </div>
     </div>
+
     <button class="btn btn-primary btn-wide" onclick="resetAll()">
       <span class="btn-icon">↺</span>
-      Tekrar Gülümse
+      Tekrar Tebessüm Et
     </button>
   </div>
 </div>
 
-<!-- CONFETTI CANVAS -->
 <canvas id="confettiCanvas" aria-hidden="true"></canvas>
