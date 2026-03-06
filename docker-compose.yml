@@ -18,6 +18,7 @@ services:
       - Minio__AccessKey=${MINIO_ROOT_USER}
       - Minio__SecretKey=${MINIO_ROOT_PASSWORD}
       - Minio__Bucket=${MINIO_BUCKET_NAME}
+      - Admin__Password=${Admin_Password}
     volumes:
       - ./wwwroot:/app/wwwroot
       - ./Views:/app/Views

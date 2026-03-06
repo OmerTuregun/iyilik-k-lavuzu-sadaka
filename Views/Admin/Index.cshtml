@@ -1,0 +1,133 @@
+@{
+    ViewData["Title"] = "Admin Panel";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin — Tebessüm Sadakadır</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/admin.css"/>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">😊</span>
+    <div>
+      <div class="logo-title">Admin</div>
+      <div class="logo-sub">Tebessüm Sadakadır</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" data-tab="overview">📊 Genel Bakış</button>
+    <button class="nav-item" data-tab="users">👥 Kullanıcılar</button>
+    <button class="nav-item" data-tab="photos">🖼️ Fotoğraflar</button>
+  </nav>
+  <button class="btn-logout" id="btnLogout">↩ Çıkış Yap</button>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="admin-main">
+
+  <!-- OVERVIEW TAB -->
+  <section class="tab-panel active" id="tab-overview">
+    <div class="panel-header">
+      <h2>Genel Bakış</h2>
+      <button class="btn-refresh" onclick="loadOverview()">↻ Yenile</button>
+    </div>
+    <div class="stats-grid" id="overviewStats">
+      <div class="stat-card"><div class="stat-val" id="ov-totalUploads">—</div><div class="stat-lbl">Toplam Yükleme</div></div>
+      <div class="stat-card"><div class="stat-val" id="ov-todayUploads">—</div><div class="stat-lbl">Bugünkü Yükleme</div></div>
+      <div class="stat-card"><div class="stat-val" id="ov-totalUsers">—</div><div class="stat-lbl">Toplam Kullanıcı</div></div>
+      <div class="stat-card"><div class="stat-val" id="ov-totalPoints">—</div><div class="stat-lbl">Toplam Dağıtılan Puan</div></div>
+    </div>
+    <div class="last-upload-row">Son yükleme: <span id="ov-lastUpload">—</span></div>
+  </section>
+
+  <!-- USERS TAB -->
+  <section class="tab-panel" id="tab-users">
+    <div class="panel-header">
+      <h2>Kullanıcılar</h2>
+      <button class="btn-refresh" onclick="loadUsers()">↻ Yenile</button>
+    </div>
+    <div class="table-wrap">
+      <table class="admin-table" id="usersTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>İsim</th><th>Puan</th><th>Streak</th>
+            <th>Yükleme</th><th>Son Seri</th><th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody id="usersTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PHOTOS TAB -->
+  <section class="tab-panel" id="tab-photos">
+    <div class="panel-header">
+      <h2>Fotoğraflar</h2>
+      <div class="photo-actions">
+        <button class="btn-danger-sm" id="btnBulkDelete" style="display:none" onclick="bulkDelete()">🗑 Seçilenleri Sil</button>
+        <button class="btn-refresh" onclick="loadPhotos(1)">↻ Yenile</button>
+      </div>
+    </div>
+    <div class="photo-grid" id="photoGrid"></div>
+    <div class="pagination" id="pagination"></div>
+  </section>
+
+</main>
+
+<!-- ── USER MODAL ── -->
+<div class="modal-backdrop hidden" id="userModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalUserName">Kullanıcı</h3>
+      <button class="modal-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <label>Puan Düzenle</label>
+        <div class="input-row">
+          <input type="number" id="editPoints" min="0" placeholder="Puan"/>
+          <button class="btn-save" onclick="savePoints()">Kaydet</button>
+        </div>
+      </div>
+      <div class="modal-section">
+        <label>Streak</label>
+        <button class="btn-danger-sm" onclick="resetStreak()">🔄 Streak Sıfırla</button>
+      </div>
+      <div class="modal-section">
+        <label>Yükleme Geçmişi</label>
+        <div class="upload-history" id="uploadHistory">Yükleniyor...</div>
+      </div>
+      <div class="modal-section modal-danger">
+        <label>Tehlikeli Alan</label>
+        <button class="btn-danger" onclick="deleteUser()">🗑 Kullanıcıyı Sil</button>
+        <p class="danger-note">Tüm yüklemeleri ile birlikte silinir.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PHOTO LIGHTBOX ── -->
+<div class="modal-backdrop hidden" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-inner" onclick="e=>e.stopPropagation()">
+    <img id="lightboxImg" src="" alt=""/>
+    <div class="lightbox-meta" id="lightboxMeta"></div>
+    <div class="lightbox-actions">
+      <a id="lightboxDownload" href="#" target="_blank" class="btn-save">⬇ İndir</a>
+      <button class="btn-danger" id="lightboxDelete">🗑 Sil</button>
+    </div>
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>
